@@ -1,0 +1,399 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* For better scrollbar appearance */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+
+.Icon_size{
+  font-size: 14px !important;
+}
+
+.font_size_body{
+font-size: 12px !important;
+}
+
+.continue_button {
+  background: linear-gradient(90deg, #007bff, #8e44ad) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.custom-appbar{
+  border-bottom: none !important;
+}
+
+.Header_menu{
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.sidebar-container .MuiListItem-root.Mui-selected {
+  background-color: rgba(255, 255, 255, 0.15) !important;  
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar-container .MuiListItem-root:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;  
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: background 0.3s, box-shadow 0.3s;
+  border-radius: 12px;
+}
+
+
+
+
+/* New styles for dropdown menu and delete dialog */
+.sidebar-dropdown-menu .MuiPaper-root {
+  background-color: #2A2A2A;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  min-width: 160px;
+}
+[data-theme='light'] .sidebar-dropdown-menu .MuiPaper-root,
+[data-theme='light'] .MuiMenu-paper {
+  background-color: #FFFFFF !important;
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.sidebar-dropdown-menu .MuiMenuItem-root {
+  font-size: 14px;
+  padding: 8px 16px;
+
+}
+[data-theme='light'] .sidebar-dropdown-menu .MuiMenuItem-root {
+  color:black;
+}
+[data-theme='dark'] .sidebar-dropdown-menu .MuiMenuItem-root {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-dropdown-menu .MuiMenuItem-root:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+[data-theme='light'] .sidebar-dropdown-menu .MuiMenuItem-root:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.sidebar-dropdown-menu .menu-item-icon {
+  margin-right: 10px;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+}
+[data-theme='light'] .sidebar-dropdown-menu .menu-item-icon {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+.sidebar-dropdown-menu .delete-menu-item {
+  color: #ff4d4f;
+}
+
+.sidebar-dropdown-menu .delete-menu-item .menu-item-icon {
+  color: #ff4d4f;
+}
+
+/* Delete confirmation dialog styles */
+.delete-dialog .MuiPaper-root {
+  background-color: #2A2A2A;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 400px;
+  width: 100%;
+}
+[data-theme='light'] .delete-dialog .MuiPaper-root {
+  background-color: #FFFFFF;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.delete-dialog .MuiDialogTitle-root {
+  font-weight: 600;
+  font-size: 18px;
+  padding-top: 24px;
+}
+
+.delete-dialog .dialog-content-text {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+[data-theme='light'] .delete-dialog .dialog-content-text {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.delete-dialog .settings-link {
+  color: #1890ff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.delete-dialog .settings-link:hover {
+  text-decoration: none;
+}
+
+.delete-dialog .MuiDialogActions-root {
+  padding: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.delete-dialog .cancel-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: none;
+  border-radius: 100px;
+  padding: 6px 18px;
+}
+[data-theme='light'] .delete-dialog .cancel-button {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.delete-dialog .cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+[data-theme='light'] .delete-dialog .cancel-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+
+.delete-dialog .delete-button {
+  background-color: #E53935;
+  color: white;
+  text-transform: none;
+  border-radius: 100px;
+  padding: 6px 18px;
+}
+
+.delete-dialog .delete-button:hover {
+  background-color: #D32F2F;
+}
+
+/* More options icon visibility */
+.sidebar-history-item .more-options-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-history-item:hover .more-options-icon {
+  opacity: 0.7;
+}
+
+/* Dialog content border */
+.dialog-content-border {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+}
+
+[data-theme='light'] .dialog-content-border {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* General hover effects for menu options */
+.sidebar-history-item {
+  position: relative;
+}
+
+.sidebar-history-item:hover .more-options-icon {
+  opacity: 0.7 !important;
+}
+
+/* Ensure the dropdown menu respects the theme */
+.MuiMenu-paper {
+  transition: background-color 0.3s ease;
+}
+
+/* Handle dark/light mode transitions */
+/* [data-theme='light'] .MuiMenu-paper {
+  background-color: #FFFFFF !important;
+  color: rgba(0, 0, 0, 0.9) !important;
+} */
+
+[data-theme='dark'] .MuiMenu-paper {
+  background-color: #2A2A2A !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Ensure dialog respects theme */
+.MuiDialog-paper {
+  transition: background-color 0.3s ease;
+}
+
+[data-theme='light'] .MuiDialog-paper {
+  background-color: #FFFFFF !important;
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+[data-theme='dark'] .MuiDialog-paper {
+  background-color: #2A2A2A !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* For the Delete buttons in any mode */
+.delete-menu-item,
+.delete-menu-item .MuiSvgIcon-root {
+  color: #ff4d4f !important;
+}
+
+/* Ensure menu icons follow theme */
+[data-theme='light'] .MuiMenuItem-root .MuiSvgIcon-root:not(.delete-menu-item .MuiSvgIcon-root) {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme='dark'] .MuiMenuItem-root .MuiSvgIcon-root:not(.delete-menu-item .MuiSvgIcon-root) {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Settings link in delete dialog */
+.settings-link {
+  color: #1890ff !important;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.settings-link:hover {
+  text-decoration: none;
+}
+
+
+.sidebar-history-item:hover .sidebar-list-item-text {
+  display: block !important;
+}
+.sidebar-history-item:hover .sidebar-list-item-short {
+  display: none !important;
+}
+.sidebar-history-item:not(:hover) .sidebar-list-item-text {
+  display: none !important;
+}
+.sidebar-history-item:not(:hover) .sidebar-list-item-short {
+  display: block !important;
+}
+.sidebar-history-item:hover .more-options-icon {
+  opacity: 1 !important;
+}
+
+
+/* When hovering over the image container */
+.Box:hover .send-wishes-btn {
+  display: block;  /* Show the button on hover */
+  opacity: 1; 
+ } /* Ensure it's visible */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add smooth scrolling specifically for chat containers */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Make the scrollbar less obtrusive */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* For the Icon_size class that's used in your buttons */
+.Icon_size {
+  font-size: 18px;
+}
+
+
+/* Add these styles to your index.css file */
+
+/* Style for edit mode */
+.edit-mode-container {
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation for edit button */
+.edit-button:hover {
+  transform: scale(1.1);
+}
+
+/* Style for edit buttons */
+.edit-actions-container button {
+  transition: all 0.2s ease-in-out;
+}
+
+.edit-actions-container button:hover {
+  transform: translateY(-2px);
+}
+
+/* Ensure Icons are properly sized */
+.Icon_size {
+  font-size: 18px !important;
+}
+
+/* Add a subtle effect when editing is active */
+.editing-active {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(66, 153, 225, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(66, 153, 225, 0);
+  }
+}

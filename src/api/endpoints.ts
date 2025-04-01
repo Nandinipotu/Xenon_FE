@@ -35,6 +35,21 @@ export const generateQuestions = async (message: string, isNewChat: boolean) => 
   }
 };
 
+export const fetchTeamMember = async () => {
+  try {
+    const response = await axiosInstance.get('http://localhost:8090/team/fetchTeam');
+    if (response.data.status && response.data.data && response.data.data.length > 0) {
+      return response.data.data[0]; 
+    } else {
+      throw new Error('Failed to fetch team data');
+    }
+  } catch (error) {
+    console.error('Error fetching team member:', error);
+    throw error;
+  }
+};
+
+
 
 
 

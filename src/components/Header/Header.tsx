@@ -19,6 +19,7 @@ import { headerStyles } from './HeaderStyles';
 import { useTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -83,7 +84,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   <MenuIcon />
 </IconButton>
           <Typography variant="h6" component="div" sx={styles.logo}>
-            
+          <Typography variant="h6" component="div" sx={styles.logo}>
+  <img src={logo} alt="Logo" style={{ height: '40px', width: 'auto' }} />
+</Typography>
+   
           </Typography>
         </Box>
         

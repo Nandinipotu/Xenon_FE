@@ -100,14 +100,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     setAnchorEl(null);
   };
   
-  // Handle delete option click
   const handleDeleteClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     handleMenuClose(event);
     setItemToDelete(menuItem);
     setDeleteDialogOpen(true);
   };
-  // Function to truncate text
 const truncateText = (text: string) => {
   if (!text) return "No Question";
   return text.length > 30 ? text.substring(0, 30) + "..." : text;
@@ -119,7 +117,6 @@ const getFirstChars = (text: string, charCount: number = 30) => {
   return text.substring(0, charCount);
 };
 
-  // Handle delete confirmation
   const handleDeleteConfirm = () => {
     if (itemToDelete?.sessionId) {
       dispatch(deleteHistory(itemToDelete.sessionId));

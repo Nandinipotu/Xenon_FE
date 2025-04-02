@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 * {
   margin: 0;
@@ -7,10 +7,11 @@
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Inter", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .custom-appbar{
@@ -18,7 +19,8 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }
 
 /* For better scrollbar appearance */
@@ -40,21 +42,20 @@ code {
   background: rgba(0, 0, 0, 0.3);
 }
 
-[data-theme='dark'] ::-webkit-scrollbar-thumb {
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
 }
 
-[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-
-.Icon_size{
+.Icon_size {
   font-size: 14px !important;
 }
 
-.font_size_body{
-font-size: 12px !important;
+.font_size_body {
+  font-size: 12px !important;
 }
 
 .continue_button {
@@ -63,7 +64,7 @@ font-size: 12px !important;
   border: none !important;
 }
 
-.custom-appbar{
+.custom-appbar {
   border-bottom: none !important;
 }
 
@@ -77,7 +78,7 @@ font-size: 12px !important;
 }
 
 .sidebar-container .MuiListItem-root.Mui-selected {
-  background-color: rgba(255, 255, 255, 0.15) !important;  
+  background-color: rgba(255, 255, 255, 0.15) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   border-radius: 12px !important;
   transition: all 0.3s ease-in-out;
@@ -85,44 +86,40 @@ font-size: 12px !important;
 }
 
 .sidebar-container .MuiListItem-root:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;  
+  background-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   transition: background 0.3s, box-shadow 0.3s;
   border-radius: 12px;
 }
 
-
-
-
 /* New styles for dropdown menu and delete dialog */
 .sidebar-dropdown-menu .MuiPaper-root {
-  background-color: #2A2A2A;
+  background-color: #2a2a2a;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
   border-radius: 8px;
   min-width: 160px;
 }
-[data-theme='light'] .sidebar-dropdown-menu .MuiPaper-root,
-[data-theme='light'] .MuiMenu-paper {
-  background-color: #FFFFFF !important;
+[data-theme="light"] .sidebar-dropdown-menu .MuiPaper-root,
+[data-theme="light"] .MuiMenu-paper {
+  background-color: #ffffff !important;
   color: rgba(0, 0, 0, 0.9) !important;
 }
 
 .sidebar-dropdown-menu .MuiMenuItem-root {
   font-size: 14px;
   padding: 8px 16px;
-
 }
-[data-theme='light'] .sidebar-dropdown-menu .MuiMenuItem-root {
-  color:black;
+[data-theme="light"] .sidebar-dropdown-menu .MuiMenuItem-root {
+  color: black;
 }
-[data-theme='dark'] .sidebar-dropdown-menu .MuiMenuItem-root {
+[data-theme="dark"] .sidebar-dropdown-menu .MuiMenuItem-root {
   color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar-dropdown-menu .MuiMenuItem-root:hover {
   background-color: rgba(255, 255, 255, 0.08);
 }
-[data-theme='light'] .sidebar-dropdown-menu .MuiMenuItem-root:hover {
+[data-theme="light"] .sidebar-dropdown-menu .MuiMenuItem-root:hover {
   background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
@@ -131,7 +128,7 @@ font-size: 12px !important;
   font-size: 18px;
   color: rgba(255, 255, 255, 0.7);
 }
-[data-theme='light'] .sidebar-dropdown-menu .menu-item-icon {
+[data-theme="light"] .sidebar-dropdown-menu .menu-item-icon {
   color: rgba(0, 0, 0, 0.7) !important;
 }
 .sidebar-dropdown-menu .delete-menu-item {
@@ -144,14 +141,14 @@ font-size: 12px !important;
 
 /* Delete confirmation dialog styles */
 .delete-dialog .MuiPaper-root {
-  background-color: #2A2A2A;
+  background-color: #2a2a2a;
   border-radius: 12px;
   color: rgba(255, 255, 255, 0.9);
   max-width: 400px;
   width: 100%;
 }
-[data-theme='light'] .delete-dialog .MuiPaper-root {
-  background-color: #FFFFFF;
+[data-theme="light"] .delete-dialog .MuiPaper-root {
+  background-color: #ffffff;
   color: rgba(0, 0, 0, 0.9);
 }
 
@@ -165,7 +162,7 @@ font-size: 12px !important;
   font-size: 14px;
   margin-bottom: 16px;
 }
-[data-theme='light'] .delete-dialog .dialog-content-text {
+[data-theme="light"] .delete-dialog .dialog-content-text {
   color: rgba(0, 0, 0, 0.7);
 }
 
@@ -192,7 +189,7 @@ font-size: 12px !important;
   border-radius: 100px;
   padding: 6px 18px;
 }
-[data-theme='light'] .delete-dialog .cancel-button {
+[data-theme="light"] .delete-dialog .cancel-button {
   background-color: rgba(0, 0, 0, 0.05);
   color: rgba(0, 0, 0, 0.7);
 }
@@ -200,13 +197,12 @@ font-size: 12px !important;
 .delete-dialog .cancel-button:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
-[data-theme='light'] .delete-dialog .cancel-button:hover {
+[data-theme="light"] .delete-dialog .cancel-button:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-
 .delete-dialog .delete-button {
-  background-color: #E53935;
+  background-color: #e53935;
   color: white;
   text-transform: none;
   border-radius: 100px;
@@ -214,7 +210,7 @@ font-size: 12px !important;
 }
 
 .delete-dialog .delete-button:hover {
-  background-color: #D32F2F;
+  background-color: #d32f2f;
 }
 
 /* More options icon visibility */
@@ -233,11 +229,9 @@ font-size: 12px !important;
   padding-bottom: 16px;
 }
 
-[data-theme='light'] .dialog-content-border {
+[data-theme="light"] .dialog-content-border {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
-
-
 
 /* General hover effects for menu options */
 .sidebar-history-item {
@@ -259,8 +253,8 @@ font-size: 12px !important;
   color: rgba(0, 0, 0, 0.9) !important;
 } */
 
-[data-theme='dark'] .MuiMenu-paper {
-  background-color: #2A2A2A !important;
+[data-theme="dark"] .MuiMenu-paper {
+  background-color: #2a2a2a !important;
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
@@ -269,13 +263,13 @@ font-size: 12px !important;
   transition: background-color 0.3s ease;
 }
 
-[data-theme='light'] .MuiDialog-paper {
-  background-color: #FFFFFF !important;
+[data-theme="light"] .MuiDialog-paper {
+  background-color: #ffffff !important;
   color: rgba(0, 0, 0, 0.9) !important;
 }
 
-[data-theme='dark'] .MuiDialog-paper {
-  background-color: #2A2A2A !important;
+[data-theme="dark"] .MuiDialog-paper {
+  background-color: #2a2a2a !important;
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
@@ -286,11 +280,15 @@ font-size: 12px !important;
 }
 
 /* Ensure menu icons follow theme */
-[data-theme='light'] .MuiMenuItem-root .MuiSvgIcon-root:not(.delete-menu-item .MuiSvgIcon-root) {
+[data-theme="light"]
+  .MuiMenuItem-root
+  .MuiSvgIcon-root:not(.delete-menu-item .MuiSvgIcon-root) {
   color: rgba(0, 0, 0, 0.7) !important;
 }
 
-[data-theme='dark'] .MuiMenuItem-root .MuiSvgIcon-root:not(.delete-menu-item .MuiSvgIcon-root) {
+[data-theme="dark"]
+  .MuiMenuItem-root
+  .MuiSvgIcon-root:not(.delete-menu-item .MuiSvgIcon-root) {
   color: rgba(255, 255, 255, 0.7) !important;
 }
 
@@ -304,7 +302,6 @@ font-size: 12px !important;
 .settings-link:hover {
   text-decoration: none;
 }
-
 
 .sidebar-history-item:hover .sidebar-list-item-text {
   display: block !important;
@@ -322,12 +319,11 @@ font-size: 12px !important;
   opacity: 1 !important;
 }
 
-
 /* When hovering over the image container */
 .Box:hover .send-wishes-btn {
-  display: block;  /* Show the button on hover */
-  opacity: 1; 
- } /* Ensure it's visible */
+  display: block; /* Show the button on hover */
+  opacity: 1;
+} /* Ensure it's visible */
 html {
   scroll-behavior: smooth;
 }
@@ -359,7 +355,6 @@ html {
 .Icon_size {
   font-size: 18px;
 }
-
 
 /* Add these styles to your index.css file */
 
@@ -403,4 +398,34 @@ html {
   100% {
     box-shadow: 0 0 0 0 rgba(66, 153, 225, 0);
   }
+}
+
+.gif {
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  text-align: center;
+  margin: 3rem 0;
+}
+
+.content .main-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+p {
+  font-size: 1.3rem;
+  padding: 0.7rem 0;
+}
+
+.pagenot-found-btn {
+  padding: 1rem;
+  border-radius: 15px;
+  outline: none;
+  border: none;
+  background: #0046d4;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
 }

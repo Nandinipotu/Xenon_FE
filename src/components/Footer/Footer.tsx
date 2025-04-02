@@ -32,8 +32,7 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
         console.log("Raw API Response:", response);
 
         if (response && response.status === 200 && response.data && Array.isArray(response.data.data)) {
-            console.log("API Response Data:", response.data.data); // Should print the correct array
-            setTeamMembers(response.data.data); // Fix applied here
+            setTeamMembers(response.data.data);
         } else {
             setError("Invalid API Response");
             setTeamMembers([]);
@@ -45,15 +44,12 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
     } finally {
         setLoading(false);
     }
-};
-
-
+  };
 
   const handleClose = () => {
     setOpen(false);
   };
   console.log('Team Members being rendered:', teamMembers);
-
 
   return (
     <>
@@ -167,7 +163,10 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
                       sx={{ 
                         fontWeight: 'bold', 
                         mb: 0.5,
-                        fontSize: '0.9rem' 
+                        fontSize: '0.9rem',
+                        wordBreak: 'break-word',
+                        maxWidth: '90px',
+                        overflowWrap: 'break-word'
                       }}
                     >
                       {member.name}
@@ -175,32 +174,14 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
                     <Typography 
                       variant="body2" 
                       sx={{ 
-                        mb: 1.5, 
                         fontSize: '0.75rem', 
                         wordBreak: 'break-word', 
-                        maxWidth: '90px'
+                        maxWidth: '90px',
+                        overflowWrap: 'break-word'
                       }}
                     >
                       {member.email}
                     </Typography>
-                    <Box
-                      sx={{
-                        backgroundColor: 'white',
-                        color: 'black',
-                        padding: '3px 6px',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                        fontSize: '0.65rem', 
-                        fontWeight: 'bold',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          backgroundColor: '#bbbbbb', 
-                          transform: 'scale(1.05)',
-                        }
-                      }}
-                    >
-                      Send Appreciation Mail
-                    </Box>
                   </Box>
                 </Box>
               ))}

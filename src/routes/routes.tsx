@@ -1,6 +1,9 @@
-import React from 'react';
-import Home from '../pages/Home';
-import Login from '../components/login/login';
+import React from "react";
+import Home from "../pages/Home";
+import Login from "../components/login/login";
+import PageNotFound from "../pages/PageNotFound";
+// import About from '../pages/About';
+// import Contact from '../pages/Contact';
 
 export interface RouteType {
   path: string;
@@ -8,8 +11,15 @@ export interface RouteType {
 }
 
 const routes: RouteType[] = [
-    {path: '/', element: <Login />},
-  { path: '/chatbot', element: <Home /> },
+  { path: "/", element: <Login /> },
+  { path: "/chatbot", element: <Home /> },
+
+  {
+    path: "*",
+    element: <PageNotFound />,
+  },
+  //   { path: '/about', element: <About /> },
+  //   { path: '/contact', element: <Contact /> },
 ];
 
 export default routes;

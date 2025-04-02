@@ -323,19 +323,22 @@ const handleDislike = (id: string) => {
         height: '100%',
         width: '100%',
         alignSelf: 'center',
+        
       }}
     >
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
         How can I support you today?
       </Typography>
 
-      <Box sx={{ width: '52%' }}>
-        <ChatInput
-          value={inputValue}
-          onChange={handleInputChange}
-          onSend={handleSendMessage}
-        />
-      </Box>
+      <Box sx={{ width: { xs: '350px', sm: '400px', md: '600px' } }}>
+  <ChatInput
+    value={inputValue}
+    onChange={handleInputChange}
+    onSend={handleSendMessage}
+  />
+</Box>
+
+
     </Box>
   ) : (
     <>

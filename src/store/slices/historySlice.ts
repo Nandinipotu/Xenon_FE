@@ -63,16 +63,18 @@ export const fetchLastThirtyDayHistory = createAsyncThunk<
     }
   }
 );
+
+
 export const deleteHistory = createAsyncThunk<
-  HistoryItem[],            
-  string,                  
-  { rejectValue: string }    
+  string,                 // Return type (sessionId to delete)
+  string,                 // Argument type (sessionId)
+  { rejectValue: string }  // Rejected value type
 >(
   'history/deleteHistory',
   async (sessionId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.delete(`/history/delete-history?sessionId=${sessionId}`);
-      return response.data?.data || [];
+      await axiosInstance.delete(`/history/delete-history?sessionId=${sessionId}`);
+      return sessionId;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to delete history');
     }
@@ -87,6 +89,7 @@ const initialState: HistoryState = {
   status: 'idle',
   error: null,
   selectedHistory: null,
+  history: [],
 };
 
 const historySlice = createSlice({
@@ -149,6 +152,20 @@ const historySlice = createSlice({
       .addCase(fetchLastThirtyDayHistory.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload || 'An error occurred';
+      })
+
+      .addCase(deleteHistory.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(deleteHistory.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.history = state.history.filter(
+          (item) => item.sessionId !== action.payload
+        );
+      })
+      .addCase(deleteHistory.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || 'Failed to delete history';
       });
 
   },

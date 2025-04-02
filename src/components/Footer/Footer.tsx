@@ -60,7 +60,7 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
       <Box sx={styles.footer}>
         <Box sx={styles.contentContainer}>
           <Typography variant="caption" sx={styles.text}>
-            API can make mistakes.
+           Nueral AI can make mistakes.
           </Typography>
           <Box sx={styles.iconContainer} onClick={handleClickOpen}>
             <img src={partyPopper} alt="Party Popper" style={styles.popperImage} />

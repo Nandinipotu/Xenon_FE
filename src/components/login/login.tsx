@@ -8,15 +8,29 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from 'store';
 import { useDispatch } from 'react-redux';
 import { fetchGoogleAccount } from 'store/slices/login';
+import { Guestlogin } from 'store/slices/guestLoginSlice';
 
 
 const Login: React.FC = () => {
 
-    const nagivate = useNavigate();
- 
-    const hangleNavigate = () => {
-        nagivate('/chatbot');
-    }
+    const navigate = useNavigate();
+
+    const handleNavigate = async () => {
+        try {
+            const resultAction = await dispatch(Guestlogin());
+    
+            if (Guestlogin.fulfilled.match(resultAction)) {
+                console.log('Login successful:', resultAction.payload.token);
+                navigate('/chatbot');  
+            } else {
+                console.error('Login failed:', resultAction.payload);
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+        }
+    };
+    
+    
 
 const dispatch = useAppDispatch();
 
@@ -72,7 +86,7 @@ const handleGoogleLogin = () => {
                 style={{ width: 20, height: 20, marginRight: 8  }}
             />
         }
-        onClick={hangleNavigate}
+        onClick={handleNavigate}
         fullWidth
         variant="outlined"
         style={{ justifyContent: 'flex-start', textAlign: 'left', padding: '14px 16px', minHeight: 50 ,}}

@@ -6,6 +6,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import { RootState, useAppDispatch } from 'store';
 import { useSelector } from 'react-redux';
 import { closeRating, incrementClick, resetClick } from 'store/slices/clickSlice';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface Window {
   webkitSpeechRecognition: any;
@@ -75,7 +76,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
   };
 
   const handleSend = () => {
-    if (count >= 5) {
+    if (count >= 50) {
       console.log('Send blocked - Show rating dialog');
       return;
     }
@@ -141,7 +142,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
   <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     Rate Us
     <IconButton onClick={handleClose} size="small">
-      ✖️
+    <CloseIcon />
+
     </IconButton>
   </DialogTitle>
   <DialogContent>

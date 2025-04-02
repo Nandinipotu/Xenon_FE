@@ -38,7 +38,7 @@ export const sidebarStyles = (mode: 'light' | 'dark'): SidebarStylesType => ({
   },
   drawerPaper: {
     width: {
-      xs: '80%', 
+      xs: '50%', 
       sm: 280,
       md: 260
     },

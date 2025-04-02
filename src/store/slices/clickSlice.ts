@@ -16,7 +16,7 @@ const clickSlice = createSlice({
   reducers: {
     incrementClick(state) {
       state.count += 1;
-      if (state.count >= 5) {
+      if (state.count >= 50) {
         state.showRating = true;
       }
     },

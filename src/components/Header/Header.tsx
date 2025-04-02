@@ -32,6 +32,8 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
+  
+
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
       setAnchorEl(event.currentTarget);
   };
@@ -85,13 +87,16 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
 </IconButton>
           <Typography variant="h6" component="div" sx={styles.logo}>
          
-  <img src={logo} alt="Logo" style={{ height: '40px', width: 'auto' }} />
+  <img src={logo} alt="Logo" style={{ height: '30px', width: 'auto' }} />
 </Typography>
    
           
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button   >
+            share
+          </Button>
         <ThemeToggle />
             <Avatar 
                 onClick={handleAvatarClick} 
@@ -105,6 +110,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleCloseMenu}
+                className='menu_logout'
             >
                 <MenuItem  className="Header_menu" onClick={handleLogoutClick}>Logout</MenuItem>
             </Menu>

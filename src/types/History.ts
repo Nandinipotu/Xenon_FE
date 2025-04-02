@@ -4,6 +4,7 @@ interface HistoryItem {
   sessionId: string | null;
   description: string;
   [key: string]: any;  
+  
 }
 
 interface HistoryState {
@@ -14,4 +15,5 @@ interface HistoryState {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   selectedHistory: string | null;
+  history:HistoryItem[]
 }

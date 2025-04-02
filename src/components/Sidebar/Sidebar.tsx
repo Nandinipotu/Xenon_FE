@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import Skeleton from "@mui/material/Skeleton";
+
 import {
   Drawer,
   List,
@@ -117,14 +119,18 @@ const getFirstChars = (text: string, charCount: number = 30) => {
   return text.substring(0, charCount);
 };
 
+
+
+  const history = useSelector((state: RootState) => state.history.history);
+
   const handleDeleteConfirm = () => {
     if (itemToDelete?.sessionId) {
       dispatch(deleteHistory(itemToDelete.sessionId));
-      console.log('Deleting chat with session ID:', itemToDelete.sessionId);
+      setItemToDelete(null); 
+      setDeleteDialogOpen(false);
     }
-    setDeleteDialogOpen(false);
-    setItemToDelete(null);
   };
+  
 
   // Handle delete cancellation
   const handleDeleteCancel = () => {
@@ -137,18 +143,38 @@ const getFirstChars = (text: string, charCount: number = 30) => {
       <Typography variant="subtitle2" sx={styles.sectionTitle}>
         {label}
       </Typography>
-
+  
       <List sx={styles.list}>
-        {status === 'loading' && <Typography>Loading...</Typography>}
-        {status === 'failed' && <Typography color="error">{error}</Typography>}
+        {/* {status === 'loading' && <Typography>Loading...</Typography>} */}
+        {status === "loading" && (
+          <>
+            {[...Array(4)].map((_, index) => (
+              <ListItem key={index} disablePadding sx={{ p: 1 }}>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", width: "100%" }}
+                >
+                  <Skeleton
+                    variant="circular"
+                    width={24}
+                    height={24}
+                    sx={{ mr: 1 }}
+                  />
+                  <Skeleton variant="text" width="80%" height={20} />
+                </Box>
+              </ListItem>
+            ))}
+          </>
+        )}
 
-        {status === 'succeeded' && data.length > 0 ? (
+        {status === 'failed' && <Typography color="error">{error}</Typography>}
+  
+        {data.length > 0 ? (
           data.map((item, index) => {
             const isSelected = selectedChat === item.id;
             const question = item.questionAnswer[0]?.question || "No Question";
             const truncatedQuestion = truncateText(question);
             const firstChars = getFirstChars(question);
-
+  
             return (
               <ListItem
                 key={index}
@@ -193,7 +219,6 @@ const getFirstChars = (text: string, charCount: number = 30) => {
                       >
                         {truncatedQuestion}
                       </Typography>
-                      
                       <Typography
                         className="sidebar-list-item-short"
                         sx={{
@@ -206,7 +231,6 @@ const getFirstChars = (text: string, charCount: number = 30) => {
                       </Typography>
                     </Box>
                   </Tooltip>
-
                   <IconButton
                     size="small"
                     onClick={(e) => handleMenuOpen(e, item)}
@@ -219,8 +243,8 @@ const getFirstChars = (text: string, charCount: number = 30) => {
                       position: 'absolute',
                       right: '8px',
                       '&:hover': {
-                        opacity: '1 !important'
-                      }
+                        opacity: '1 !important',
+                      },
                     }}
                   >
                     <MoreHorizIcon sx={{ 
@@ -233,15 +257,18 @@ const getFirstChars = (text: string, charCount: number = 30) => {
             );
           })
         ) : (
-          status === 'succeeded' && <Typography sx={{ 
+          <Typography sx={{ 
             textAlign: "center", 
             fontSize: '12px !important',
             color: mode === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'
-          }}>No history found.</Typography>
+          }}>
+            No history found.
+          </Typography>
         )}
       </List>
     </>
   );
+  
 
   return (
     <Drawer
@@ -347,7 +374,6 @@ const getFirstChars = (text: string, charCount: number = 30) => {
         </MenuItem>
       </Menu>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleDeleteCancel}

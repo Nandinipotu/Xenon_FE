@@ -159,10 +159,16 @@ const historySlice = createSlice({
       })
       .addCase(deleteHistory.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.history = state.history.filter(
-          (item) => item.sessionId !== action.payload
-        );
+        const sessionId = action.payload;
+      
+        // Update all arrays where the item might exist
+        state.todayData = state.todayData.filter((item) => item.sessionId !== sessionId);
+        state.yesterdayData = state.yesterdayData.filter((item) => item.sessionId !== sessionId);
+        state.lastSevenDays = state.lastSevenDays.filter((item) => item.sessionId !== sessionId);
+        state.lastThirtyDays = state.lastThirtyDays.filter((item) => item.sessionId !== sessionId);
       })
+      
+    
       .addCase(deleteHistory.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload || 'Failed to delete history';

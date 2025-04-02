@@ -121,7 +121,8 @@ const getFirstChars = (text: string, charCount: number = 30) => {
 
 
 
-  const history = useSelector((state: RootState) => state.history.history);
+const historyData = useSelector((state: RootState) => state.history.history);
+
 
   const handleDeleteConfirm = () => {
     if (itemToDelete?.sessionId) {
@@ -130,9 +131,10 @@ const getFirstChars = (text: string, charCount: number = 30) => {
       setDeleteDialogOpen(false);
     }
   };
+
+  
   
 
-  // Handle delete cancellation
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setItemToDelete(null);

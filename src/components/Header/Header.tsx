@@ -84,11 +84,11 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   <MenuIcon />
 </IconButton>
           <Typography variant="h6" component="div" sx={styles.logo}>
-          <Typography variant="h6" component="div" sx={styles.logo}>
+         
   <img src={logo} alt="Logo" style={{ height: '40px', width: 'auto' }} />
 </Typography>
    
-          </Typography>
+          
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

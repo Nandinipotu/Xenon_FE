@@ -1,6 +1,9 @@
 import axios, { AxiosInstance } from "axios";
 
-const BASE_URL = "http://localhost:8090/api/";
+const BASE_URL = "https://sparkapi-50025700077.development.catalystappsail.in/api/";
+ 
+
+// const BASE_URL = "http://localhost:8090/api/";
 const OAUTH_URL = "http://localhost:8090/oauth2/";
 
 const createAxiosInstance = (): AxiosInstance => {

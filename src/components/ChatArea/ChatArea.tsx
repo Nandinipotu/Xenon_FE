@@ -20,7 +20,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ContentCopy as CopyIcon, Check as CheckIcon } from '@mui/icons-material';
 import { ThreeDots } from 'react-loader-spinner';
-import { fetchChatHistory } from 'store/slices/sessionIdSlice';
 
 interface History {
   date: string;
@@ -66,35 +65,23 @@ const ChatArea: React.FC = () => {
     setInputValue(value);
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = () => {
     const trimmedInput = inputValue.trim();
   
     if (trimmedInput !== '') {
-      try {
-        const isImagePrompt = trimmedInput.toLowerCase().includes('generate');
+      const isImagePrompt = trimmedInput.toLowerCase().includes('generate');
   
-        const sessionId = crypto.randomUUID();
+      dispatch(
+        sendMessage({
+          prompt: trimmedInput,
+          message: isImagePrompt ? '' : trimmedInput,
+          isNewChat: true,  
+        })
+      );
   
-        await dispatch(fetchChatHistory(sessionId));
-  
-        window.history.pushState({}, '', `/chatbot/${sessionId}`);
-  
-        dispatch(
-          sendMessage({
-            prompt: trimmedInput,
-            message: isImagePrompt ? '' : trimmedInput,
-            isNewChat: true,
-          })
-        );
-  
-        setInputValue('');
-        console.log('Message sent with session ID:', sessionId);
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
+      setInputValue('');
     }
   };
-  
   
   useEffect(() => {
     if (selectedHistory) {

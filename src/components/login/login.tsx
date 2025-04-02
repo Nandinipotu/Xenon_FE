@@ -50,7 +50,7 @@ const handleGoogleLogin = () => {
     >
         Continue with Google
     </Button>
-    <Button
+    {/* <Button
         startIcon={
             <img
                 src={microsofticon}
@@ -63,7 +63,7 @@ const handleGoogleLogin = () => {
         style={{ justifyContent: 'flex-start', textAlign: 'left', padding: '14px 16px', minHeight: 50 }}
     >
         Continue with Microsoft Account
-    </Button>
+    </Button> */}
     <Button
         startIcon={
             <img

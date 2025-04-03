@@ -74,7 +74,14 @@ export const sidebarStyles = (mode: 'light' | 'dark'): SidebarStylesType => ({
     padding: (theme) => theme.spacing(1, 2),
     color: mode === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.6)',
     fontSize: '12px',
-    marginTop: 2,
+    marginTop: 0,
+    position:'sticky',
+    top:0,
+    // backgroundColor: "rgb(247 247 247)", 
+    backgroundColor: mode === 'dark' ? '#454653' : 'rgb(247 247 247)',
+
+    zIndex: 100,
+    opacity:1,
   },
   list: {
     padding: 0,

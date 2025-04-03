@@ -27,6 +27,7 @@ import {
   Edit as EditIcon,
   Archive as ArchiveIcon,
   Delete as DeleteIcon,
+  DriveFileRenameOutlineSharp,
 } from '@mui/icons-material';
 import { sidebarStyles } from './SidebarStyles';
 import { useTheme } from '../../context/ThemeContext';
@@ -153,8 +154,8 @@ const historyData = useSelector((state: RootState) => state.history.history);
     if (isMobile) {
       onClose();
     }
-  }, [isMobile, onClose]);
-  
+  }, [isMobile]);
+
 
   const renderHistoryList = (data: any[], label: string) => (
     <>
@@ -286,59 +287,107 @@ const historyData = useSelector((state: RootState) => state.history.history);
       </List>
     </>
   );
-  
+
 
   return (
     <Drawer
       className="sidebar-container"
-      variant="persistent"
+      variant={isMobile ? "temporary" : "persistent"}
       open={open}
       onClose={onClose}
-      sx={styles.drawer}
-      slotProps={{ paper: { sx: styles.drawerPaper } }}
+      disableScrollLock
+      onClick={() => isMobile ? onClose() : open} 
+      sx={{
+        width: 300, // Set drawer width
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: {
+            xs: "50%",
+            sm: 280,
+            md: 260,
+          },
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column", // Ensure content aligns vertically
+        },
+      }}
     >
-       <div style={{ display: 'flex', justifyContent: 'flex-start' ,marginLeft: '18px' }}>
-    <IconButton
-      edge="start"
-      color="inherit"
-      aria-label="menu"
-      onClick={onClose}
-    >
-      <MenuIcon sx={{fontSize:"20px"}} />
+  {/* Header */}
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "8px 16px",
+      position: "sticky",
+      top: 0,
+      backgroundColor: "inherit", // Match Drawer background
+      zIndex: 100,
+    }}
+  >
+    <IconButton edge="start" color="inherit" aria-label="menu" onClick={onClose}>
+      <MenuIcon />
     </IconButton>
-    </div>
-      <div className="sidebar-container">
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          sx={styles.newChatButton}
-          onClick={handleNewChat}
-        >
-          New chat
-        </Button>
+    <Tooltip title="New Chat" arrow>
+      <IconButton
+        edge="end"
+        color="inherit"
+        aria-label="new chat"
+        onClick={handleNewChat}
+        sx={{
+          color: mode === "dark" ? "#ffffff" : "#202123",
+          "&:hover": {
+            backgroundColor: mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+          },
+        }}
+      >
+        <DriveFileRenameOutlineSharp />
+      </IconButton>
+    </Tooltip>
+  </Box>
 
-        {renderHistoryList(todayData, 'Today')}
-        {renderHistoryList(yesterdayData, 'Yesterday')}
-        {renderHistoryList(lastSevenDays, 'Last-7-day')}
-        {renderHistoryList(lastThirtyDays || [], 'Last-30-day')}
+  {/* Content: Chat History */}
+  <Box
+    sx={{
+      flex: 1,
+      overflowY: "auto", 
+      padding: "0px",
+    }}
+  >
+    <List sx={{paddingTop:"0px"}}>
+      {renderHistoryList(todayData, "Today")}
+      {renderHistoryList(yesterdayData, "Yesterday")}
+      {renderHistoryList(lastSevenDays, "Last 7 Days")}
+      {renderHistoryList(lastThirtyDays, "Last 30 Days")}
+    </List>
+  </Box>
 
-        <List sx={styles.bottomList}>
-          <ListItem disablePadding sx={styles.bottomListItem}>
-            <SettingsIcon fontSize="small" sx={styles.listItemIcon} />
-            <ListItemText
-              primary="Settings"
-              sx={{
-                '& span': {
-                  fontSize: '14px !important',
-                  fontFamily: 'Inter, sans-serif !important',
-                  color: mode === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
-                },
-              }}
-            />
-          </ListItem>
-        </List>
-      </div>
-
+  {/* Footer */}
+  <Box
+    sx={{
+      position: "sticky",
+      bottom: 0,
+      padding: "8px 16px",
+      backgroundColor: mode === "dark" ? "#121212" : "#f8f9fa",
+    }}
+  >
+    <List>
+      <ListItem disablePadding>
+        <SettingsIcon sx={{ marginRight: "8px" }} />
+        <ListItemText
+          primary="Settings"
+          sx={{
+            "& span": {
+              fontSize: "16px",
+              fontWeight: 500,
+              color: mode === "dark" ? "#fff" : "#222",
+              padding:'2px',
+            },
+          }}
+        />
+      </ListItem>
+    </List>
+  </Box>
       {/* Dropdown Menu */}
       <Menu
         anchorEl={anchorEl}

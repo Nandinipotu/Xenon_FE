@@ -20,6 +20,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ContentCopy as CopyIcon, Check as CheckIcon } from '@mui/icons-material';
 import { ThreeDots } from 'react-loader-spinner';
+import { fetchChatHistory } from 'store/slices/sessionIdSlice';
 
 interface History {
   date: string;
@@ -65,21 +66,32 @@ const ChatArea: React.FC = () => {
     setInputValue(value);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const trimmedInput = inputValue.trim();
   
     if (trimmedInput !== '') {
-      const isImagePrompt = trimmedInput.toLowerCase().includes('generate');
+      try {
+        const isImagePrompt = trimmedInput.toLowerCase().includes('generate');
   
-      dispatch(
-        sendMessage({
-          prompt: trimmedInput,
-          message: isImagePrompt ? '' : trimmedInput,
-          isNewChat: true,  
-        })
-      );
+        const sessionId = crypto.randomUUID();
   
-      setInputValue('');
+        await dispatch(fetchChatHistory(sessionId));
+  
+        window.history.pushState({}, '', `/chatbot/${sessionId}`);
+  
+        dispatch(
+          sendMessage({
+            prompt: trimmedInput,
+            message: isImagePrompt ? '' : trimmedInput,
+            isNewChat: true,
+          })
+        );
+  
+        setInputValue('');
+        // console.log('Message sent with session ID:', sessionId);
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
   
@@ -147,7 +159,6 @@ const handleDislike = (id: string) => {
     // Update the message in Redux
     dispatch(updateUserMessage({ id, content: editedContent }));
     
-    // Send the edited message to get a new response
     // But we need to identify this as an edit, not a new message
     dispatch(
       sendMessage({

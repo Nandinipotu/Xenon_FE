@@ -75,17 +75,24 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     logSessionIds(lastSevenDays, 'Last 7 Days');
     logSessionIds(lastThirtyDays, 'Last 30 Days');
   }, [todayData, yesterdayData, lastSevenDays, lastThirtyDays]);
-
   const handleHistoryClick = (item: any) => {
     dispatch(setSelectedHistory(item));
     setSelectedChat(item.id);
+  
+    // Update the URL with the selected session ID
+    window.history.pushState({}, '', `/chatbot/${item.sessionId}`);
   };
+  
 
   const handleNewChat = () => {
     dispatch(resetMessages());
     dispatch(resetSelectedHistory());
     setSelectedChat(null);
-  };  
+  
+    // Clear the URL for a new chat
+    window.history.pushState({}, '', `/chatbot`);
+  };
+  
 
   // Handle opening the menu
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>, item: any) => {

@@ -35,6 +35,7 @@ import { deleteHistory, fetchLastSevenDayHistory, fetchLastThirtyDayHistory, fet
 import { RootState, useAppDispatch } from '../../store';
 import { resetMessages } from 'store/slices/chatSlice';
 import { Menu as MenuIcon } from '@mui/icons-material';
+import useIsMobile from './useIsMobile';
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
@@ -53,6 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
   // State for delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     dispatch(fetchTodayHistory());
@@ -139,6 +141,13 @@ const historyData = useSelector((state: RootState) => state.history.history);
     setDeleteDialogOpen(false);
     setItemToDelete(null);
   };
+
+  useEffect(() => {
+    if (isMobile) {
+      onClose();
+    }
+  }, [isMobile, onClose]);
+  
 
   const renderHistoryList = (data: any[], label: string) => (
     <>

@@ -51,7 +51,8 @@ const dispatch = useAppDispatch();
 
 const handleGoogleLogin = () => {
     
-    window.location.href = "http://localhost:8090/oauth2/authorization/google";
+    // window.location.href = "http://localhost:8090/oauth2/authorization/google";
+    window.location.href = "https://sparkapi-50025700077.development.catalystappsail.in/login/oauth2/code/google";
 };
 
 

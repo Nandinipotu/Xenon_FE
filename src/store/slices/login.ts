@@ -9,7 +9,11 @@ interface AuthState {
   error: string | null;
   isAuthenticated: boolean;
   userType: 'guest' | 'google' | null;
-  data: any[];
+  data: {
+    name?: string;
+    email?: string;
+    picture?: string;
+  } | null; 
 }
 
 // Initial state with values from cookies
@@ -22,7 +26,7 @@ const initialState: AuthState = {
     const userType = Cookies.get("userType");
     return userType === "guest" || userType === "google" ? userType : null;
   })(),
-  data: [],
+  data: null,
 };
 
 
@@ -59,30 +63,35 @@ export const Guestlogin = createAsyncThunk(
 
 // 🔑 Google Login Thunk
 export const fetchGoogleAccount = createAsyncThunk(
-  "auth/fetchGoogleAccount",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.get("/login/google", {
-        withCredentials: true,
-      });
-
-      console.log("Google Login Response:", response.data);
-
-      const token = response.data?.data?.jwt;
-      if (token) {
-        Cookies.set("jwt", token, { expires: 7, sameSite: "Lax", secure: true });
-        Cookies.set("userType", "google", { expires: 7, sameSite: "Lax", secure: true });
-        console.log("Google token stored in cookies:", Cookies.get("jwt"));
-        return response.data;
+    "auth/fetchGoogleAccount",
+    async (_, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.get("/login/google", {
+          withCredentials: true,
+        });
+  
+        console.log("Google Login Response:", response.data);
+  
+        const token = response.data?.data?.jwt;
+        const picture = response.data?.data?.picture; // ✅ Extract picture
+        const name = response.data?.data?.name;
+        const email = response.data?.data?.email;
+  
+        if (token) {
+          Cookies.set("jwt", token, { expires: 7, sameSite: "Lax", secure: true });
+          Cookies.set("userType", "google", { expires: 7, sameSite: "Lax", secure: true });
+          console.log("Google token stored in cookies:", Cookies.get("jwt"));
+  
+          return { token, picture, name, email };
+        }
+  
+        return rejectWithValue("Token not found in response");
+      } catch (error: any) {
+        console.error("Google login error:", error);
+        return rejectWithValue(error.message || "Failed to fetch Google account");
       }
-
-      return rejectWithValue("Token not found in response");
-    } catch (error: any) {
-      console.error("Google login error:", error);
-      return rejectWithValue(error.message || "Failed to fetch Google account");
     }
-  }
-);
+  );
 
 // 🔒 Logout Action
 const authSlice = createSlice({
@@ -93,7 +102,7 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.userType = null;
-      state.data = [];
+      state.data = null; 
       Cookies.remove("jwt");
       Cookies.remove("userType");
       console.log("Logged out: Cookies cleared");
@@ -110,7 +119,11 @@ const authSlice = createSlice({
       })
       .addCase(fetchGoogleAccount.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload;
+        state.data = {
+            name: action.payload.name,
+            email: action.payload.email,
+            picture: action.payload.picture, // ✅ Store picture
+          };
         state.isAuthenticated = true;
         state.userType = "google";
         state.error = null;

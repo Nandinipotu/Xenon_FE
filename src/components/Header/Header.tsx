@@ -79,6 +79,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
 
 
   const [linkCreated, setLinkCreated] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.data);
 
   const handleCreateLink = () => {
     setLinkCreated(true);
@@ -261,14 +262,19 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
     </Dialog>
 
         <ThemeToggle />
-            <Avatar 
-                onClick={handleAvatarClick} 
-                sx={{ cursor: 'pointer', bgcolor: 'primary.main',        width: 24,  // Smaller width
-                  height: 24, 
-                  fontSize: '0.875rem'  }}
-            >
-                U
-            </Avatar>
+        <Avatar
+      onClick={handleAvatarClick}
+      sx={{
+        cursor: "pointer",
+        bgcolor: "primary.main",
+        width: 24,
+        height: 24,
+        fontSize: "0.875rem",
+      }}
+      src={user?.picture} // ✅ Set profile image
+    >
+      {!user?.picture ? user?.name?.charAt(0) || "U" : null}
+    </Avatar>
 
 <Menu
   anchorEl={anchorEl}
@@ -319,7 +325,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
             fontSize: '1.25rem',
         }}
     >
-          Are you sure you want <br/> to logout?
+          {`Hey ${user?.name}, are you sure you want`}  to logout?
     </DialogTitle>
     <DialogContent
         sx={{

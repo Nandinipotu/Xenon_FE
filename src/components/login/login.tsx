@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { fetchGoogleAccount } from 'store/slices/login';
 import { Guestlogin } from 'store/slices/guestLoginSlice';
 import Cookies from 'js-cookie';
+import AnimatedBackground from '../ThemeToggle/AnimatedBackground';
 
 
 const Login: React.FC = () => {
@@ -56,6 +57,7 @@ const handleGoogleLogin = () => {
 
     return (
         <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="#f5f5f5">
+            <AnimatedBackground />
             <Box width={400} p={4} >
                 <Typography variant="h4" align="center" gutterBottom>
                     Welcome back

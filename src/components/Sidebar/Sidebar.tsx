@@ -28,6 +28,11 @@ import {
   Archive as ArchiveIcon,
   Delete as DeleteIcon,
   DriveFileRenameOutlineSharp,
+  Close,
+  Facebook,
+  LinkedIn,
+  Reddit,
+  Twitter,
 } from '@mui/icons-material';
 import { sidebarStyles } from './SidebarStyles';
 import { useTheme } from '../../context/ThemeContext';
@@ -56,6 +61,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any | null>(null);
   const isMobile = useIsMobile();
+
+  // State for share dialog (added)
+  const [openShareDialog, setOpenShareDialog] = useState(false);
+  const [linkCreated, setLinkCreated] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTodayHistory());
@@ -118,6 +127,27 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
     setItemToDelete(menuItem);
     setDeleteDialogOpen(true);
   };
+
+  // Handle share click (added)
+  const handleShareClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleMenuClose(event);
+    setOpenShareDialog(true);
+  };
+
+  // Handle create link (added)
+  const handleCreateLink = () => {
+    setLinkCreated(true);
+    navigator.clipboard.writeText(window.location.href);
+    // You could add a toast notification here
+  };
+
+  // Handle copy link (added)
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    // You could add a toast notification here
+  };
+
 const truncateText = (text: string) => {
   if (!text) return "No Question";
   return text.length > 30 ? text.substring(0, 30) + "..." : text;
@@ -394,7 +424,7 @@ const historyData = useSelector((state: RootState) => state.history.history);
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={(e) => e.stopPropagation()} sx={styles.menuItem}>
+        <MenuItem onClick={handleShareClick} sx={styles.menuItem}>
           <ShareIcon fontSize="small" sx={{ 
             marginRight: '10px',
             color: mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
@@ -430,6 +460,7 @@ const historyData = useSelector((state: RootState) => state.history.history);
         </MenuItem>
       </Menu>
 
+      {/* Delete Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleDeleteCancel}
@@ -485,11 +516,122 @@ const historyData = useSelector((state: RootState) => state.history.history);
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Share Dialog - Added new dialog for sharing */}
+      <Dialog
+        open={openShareDialog}
+        onClose={() => setOpenShareDialog(false)}
+        maxWidth="xs"
+        PaperProps={{
+          style: {
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.2)',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: '1.2rem',
+            position: 'relative',
+          }}
+        >
+          Public link created
+          <IconButton
+            onClick={() => setOpenShareDialog(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: '#555',
+            }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            textAlign: 'center',
+            fontSize: '0.9rem',
+            color: '#555',
+            marginBottom: '12px',
+          }}
+        >
+          A public link to your chat has been created. Manage previously shared chats at any time via 
+          <a href="#" style={{ textDecoration: 'underline' }}> Settings</a>.
+        </DialogContent>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 12px',
+            backgroundColor: '#f1f1f1',
+            borderRadius: '30px',
+            marginBottom: '16px',
+          }}
+        >
+          <Typography
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              marginRight: '8px',
+              flex: 1,
+            }}
+          >
+            {window.location.href}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={linkCreated ? handleCopyLink : handleCreateLink}
+            sx={{
+              color: '#fff',
+              borderRadius: '20px',
+              padding: '6px 16px',
+            }}
+          >
+            {linkCreated ? 'Copy link' : 'Create link'}
+          </Button>
+        </Box>
+
+        {linkCreated && (
+          <DialogActions sx={{ justifyContent: 'center' }}>
+            <IconButton
+              size="large"
+              aria-label="LinkedIn"
+              onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank')}
+            >
+              <LinkedIn />
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="Facebook"
+              onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
+            >
+              <Facebook />
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="Reddit"
+              onClick={() => window.open(`https://www.reddit.com/submit?url=${encodeURIComponent(window.location.href)}`, '_blank')}
+            >
+              <Reddit />
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="Twitter"
+              onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=Check%20out%20this%20chat!`, '_blank')}
+            >
+              <Twitter />
+            </IconButton>
+          </DialogActions>
+        )}
+      </Dialog>
     </Drawer>
   );
 };
 
 export default Sidebar;
-
-
-

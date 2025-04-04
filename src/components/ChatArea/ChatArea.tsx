@@ -73,7 +73,7 @@ const ChatArea: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
- 
+
   const handleInputChange = (value: string) => {
     setInputValue(value);
   };
@@ -204,6 +204,21 @@ const handleCopy = (content: string, messageId?: string) => {
     const handlePaginationNav = (id: string, direction: 'next' | 'prev') => {
       dispatch(navigatePagination({ id, direction }));
     };
+    const isImageUrl = (text: string): boolean => {
+      if (!text) return false;
+     
+      // Acceptable domains for image proxying
+      const imageProxyDomains = ['together.ai', 'imgproxy'];
+     
+      try {
+        const url = new URL(text);
+        return imageProxyDomains.some(domain => url.hostname.includes(domain));
+      } catch (e) {
+        return false;
+      }
+    };
+   
+   
  
   const handleSpeak = (id: string, text: string) => {
     if ('speechSynthesis' in window) {
@@ -420,7 +435,6 @@ const handleCopy = (content: string, messageId?: string) => {
  
         {selectedHistory && (
           <>
-         
             {selectedHistory.questionAnswer.map((qa, index) => (
               <Box key={index} sx={{  mt: 2,mb: 2 }}>
                 <Box
@@ -495,12 +509,20 @@ const handleCopy = (content: string, messageId?: string) => {
       color: 'black',
       padding: '8px 12px',
       borderRadius: '12px',
-      maxWidth: '80%',
+      maxWidth: '70%',
       wordWrap: 'break-word',
       position: 'relative',
     }}
   >
+{isImageUrl(qa.answer) ? (
+    <img
+      src={qa.answer}
+      alt="answer"
+      style={{ maxWidth: '100%', borderRadius: '8px' }}
+    />
+  ) : (
     <Typography>{renderFormattedMessage(qa.answer)}</Typography>
+  )}
   </Box>
  
   {/* Icons Outside the Content Box */}
@@ -758,3 +780,4 @@ const handleCopy = (content: string, messageId?: string) => {
 };
  
 export default ChatArea;
+ 

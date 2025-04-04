@@ -66,6 +66,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
 
+  const handleLoguout = () => {
+    navigate("/")
+  }
+
   const handleNavigateLogout = () => {
     dispatch(logoutUser())
       .unwrap() 
@@ -362,7 +366,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
         </Box>
         ) : (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: 2 }} >
-            <Button variant="contained" sx={{borderRadius:"20px"}} onClick={handleNavigateLogout}>
+            <Button variant="contained" sx={{borderRadius:"20px"}} onClick={handleLoguout}>
               Sign In
             </Button>
           </Box>

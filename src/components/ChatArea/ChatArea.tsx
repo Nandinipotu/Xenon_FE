@@ -62,15 +62,15 @@ const ChatArea: React.FC = () => {
   };
 
  
-  useEffect(() => {
-    const token = Cookies.get("jwt");
-    if (!token) {
-      dispatch(fetchGoogleAccount());
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const token = Cookies.get("jwt");
+  //   if (!token) {
+  //     dispatch(fetchGoogleAccount());
+  //   }
+  // }, [dispatch]);
   
 
-  useEffect(() => {
+  useEffect(() => { 
     scrollToBottom();
   }, [messages, loading]);
 
@@ -89,7 +89,7 @@ const ChatArea: React.FC = () => {
   
         await dispatch(fetchChatHistory(sessionId));
   
-        window.history.pushState({}, '', `/chatbot/${sessionId}`);
+        window.history.pushState({}, '', `/chatbot/c/${sessionId}`);
   
         dispatch(
           sendMessage({

@@ -7,7 +7,7 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
-  TextField 
+  TextField
 } from '@mui/material';
 import { ThumbUp, ThumbDown, ContentCopy, Edit, VolumeUp, VolumeOff, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
@@ -15,7 +15,7 @@ import { chatAreaStyles } from './ChatAreaStyles';
 import ChatInput from './ChatInput';
 import { useTheme } from '../../context/ThemeContext';
 import { useAppDispatch, useAppSelector } from "../../api/hooks";
-import { navigateEditHistory, sendMessage, updateUserMessage } from "../../store/slices/chatSlice";
+import { editUserQuestion, navigateEditHistory, navigatePagination, sendMessage, updateUserMessage } from "../../store/slices/chatSlice";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ContentCopy as CopyIcon, Check as CheckIcon } from '@mui/icons-material';
@@ -24,18 +24,18 @@ import { fetchChatHistory } from 'store/slices/sessionIdSlice';
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import { fetchGoogleAccount } from 'store/slices/login';
 import Cookies from 'js-cookie';
-
+ 
 interface History {
   date: string;
   questionAnswer: { question: string; answer: string }[];
 }
-
+ 
 interface ChatAreaProps {
   mode: 'light' | 'dark';
   message: string;
 }
-
-
+ 
+ 
 const ChatArea: React.FC = () => {
   const { mode } = useTheme();
   const muiTheme = useMuiTheme();
@@ -47,20 +47,20 @@ const ChatArea: React.FC = () => {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState('');
-  
-
+ 
+ 
   const { messages, loading } = useAppSelector((state) => state.chat);
   const activeColor = mode === 'dark' ? '#191970' : 'black';
   console.log("newchat", messages);
   // const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const selectedHistory = useAppSelector((state) => state.history.selectedHistory) as History | null;
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
-
+ 
   const conversationStarted = messages.length > 0 || selectedHistory !== null;
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
+ 
  
   // useEffect(() => {
   //   const token = Cookies.get("jwt");
@@ -68,29 +68,29 @@ const ChatArea: React.FC = () => {
   //     dispatch(fetchGoogleAccount());
   //   }
   // }, [dispatch]);
-  
-
-  useEffect(() => { 
+ 
+ 
+  useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
-
+ 
   const handleInputChange = (value: string) => {
     setInputValue(value);
   };
-
+ 
   const handleSendMessage = async () => {
     const trimmedInput = inputValue.trim();
-  
+ 
     if (trimmedInput !== '') {
       try {
         const isImagePrompt = trimmedInput.toLowerCase().includes('generate');
-  
+ 
         const sessionId = crypto.randomUUID();
-  
+ 
         await dispatch(fetchChatHistory(sessionId));
-  
+ 
         window.history.pushState({}, '', `/chatbot/c/${sessionId}`);
-  
+ 
         dispatch(
           sendMessage({
             prompt: trimmedInput,
@@ -98,7 +98,7 @@ const ChatArea: React.FC = () => {
             isNewChat: true,
           })
         );
-  
+ 
         setInputValue('');
         // console.log('Message sent with session ID:', sessionId);
       } catch (error) {
@@ -106,18 +106,18 @@ const ChatArea: React.FC = () => {
       }
     }
   };
-  
+ 
   useEffect(() => {
     if (selectedHistory) {
       setIsHistoryLoading(true);
       const timer = setTimeout(() => {
         setIsHistoryLoading(false);
-      }, 1000); 
-
+      }, 1000);
+ 
       return () => clearTimeout(timer);
     }
   }, [selectedHistory]);
-  
+ 
   useEffect(() => {
     if (selectedHistory) {
       setIsHistoryLoading(true);
@@ -131,31 +131,31 @@ const ChatArea: React.FC = () => {
  
 const [likedIndexes, setLikedIndexes] = useState<string[]>([]);
 const [dislikedIndexes, setDislikedIndexes] = useState<string[]>([]);
-
+ 
 const handleLike = (id: string) => {
   setLikedIndexes((prev) =>
     prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
   );
   setDislikedIndexes((prev) => prev.filter((i) => i !== id)); // Remove from dislikes when liked
 };
-
+ 
 const handleDislike = (id: string) => {
   setDislikedIndexes((prev) =>
     prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
   );
   setLikedIndexes((prev) => prev.filter((i) => i !== id)); // Remove from likes when disliked
 };
-
  
-
+ 
+ 
 const handleCopy = (content: string, messageId?: string) => {
   navigator.clipboard.writeText(content);
   setCopiedMessageId(messageId || content); // Use content as fallback ID
   setTimeout(() => setCopiedMessageId(null), 1500);
 };
-
-
-
+ 
+ 
+ 
   const handleEdit = (id: string) => {
     // Find the message to edit
     const messageToEdit = messages.find(msg => msg.id === id);
@@ -164,7 +164,7 @@ const handleCopy = (content: string, messageId?: string) => {
       setEditedContent(messageToEdit.content);
     }
   };
-
+ 
   const handleCancelEdit = () => {
     setEditingMessageId(null);
     setEditedContent('');
@@ -173,22 +173,38 @@ const handleCopy = (content: string, messageId?: string) => {
     dispatch(navigateEditHistory({ id, index }));
   };
   const handleSaveEdit = (id: string) => {
-    dispatch(updateUserMessage({ id, content: editedContent }));
-    
-    dispatch(
-      sendMessage({
-        prompt: editedContent,
-        message: editedContent, 
-        isNewChat: false,
-        isEdit: true,  
-        editedMessageId: id 
-      })
-    );
-    
+    // Find the message being edited
+    const messageToEdit = messages.find(msg => msg.id === id);
+    if (messageToEdit && messageToEdit.sessionId) {
+      // Call the edit API with the sessionId and new content
+      dispatch(editUserQuestion({
+        sessionId: messageToEdit.sessionId,
+        newQuestion: editedContent,
+        messageId: id
+      }));
+    } else {
+      // If no sessionId, just update the message locally and trigger a new message
+      dispatch(updateUserMessage({ id, content: editedContent }));
+     
+      dispatch(
+        sendMessage({
+          prompt: editedContent,
+          message: editedContent,
+          isNewChat: false,
+          isEdit: true,  // Add this flag
+          editedMessageId: id  // Pass the ID of the edited message
+        })
+      );
+    }
+   
+    // Reset editing state
     setEditingMessageId(null);
     setEditedContent('');
   };
-
+    const handlePaginationNav = (id: string, direction: 'next' | 'prev') => {
+      dispatch(navigatePagination({ id, direction }));
+    };
+ 
   const handleSpeak = (id: string, text: string) => {
     if ('speechSynthesis' in window) {
       if (speakingMessageId === id) {
@@ -200,7 +216,7 @@ const handleCopy = (content: string, messageId?: string) => {
         utterance.rate = 1;
         utterance.pitch = 1;
         utterance.volume = 1;
-
+ 
         utterance.onend = () => setSpeakingMessageId(null);
         window.speechSynthesis.speak(utterance);
         setSpeakingMessageId(id);
@@ -209,12 +225,12 @@ const handleCopy = (content: string, messageId?: string) => {
       console.error('Text-to-speech not supported');
     }
   };
-
+ 
   const renderFormattedMessage = (text: string, mode: 'light' | 'dark' = 'light') => {
     if (!text) {
       return (
-<Box 
-                sx={{ 
+<Box
+                sx={{
                     color: mode === 'dark' ? 'black' : 'black',
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "14px",
@@ -227,7 +243,7 @@ const handleCopy = (content: string, messageId?: string) => {
     const codeBlockRegex = /```(.*?)\n([\s\S]*?)```/g;
     const parts = [];
     let lastIndex = 0;
-  
+ 
     text.replace(codeBlockRegex, (match, lang, code, offset) => {
       if (offset > lastIndex) {
         parts.push(
@@ -236,9 +252,9 @@ const handleCopy = (content: string, messageId?: string) => {
             variant="body1"
             sx={{
               whiteSpace: 'pre-wrap',
-              fontSize: '14px',     
-              lineHeight: '1.6',     
-              fontFamily: 'Arial, sans-serif', 
+              fontSize: '14px',    
+              lineHeight: '1.6',    
+              fontFamily: 'Arial, sans-serif',
               // color: mode === 'dark' ? '#E1E1E1' : '#333',
             }}
           >
@@ -246,13 +262,13 @@ const handleCopy = (content: string, messageId?: string) => {
           </Typography>
         );
       }
-  
+ 
       const handleCopyCode = async (code: string) => {
         navigator.clipboard.writeText(code);
         setCopiedMessageId(code); // Use content ascode fallback ID
         setTimeout(() => setCopiedMessageId(null), 1500);
       };
-  
+ 
       parts.push(
         <Box
           key={offset}
@@ -282,10 +298,10 @@ const handleCopy = (content: string, messageId?: string) => {
 ) : (
   <ContentCopy className='Icon_size' />
 )}            </IconButton>
-
+ 
            
           {/* </Tooltip> */}
-  
+ 
           <SyntaxHighlighter
             language={lang || 'javascript'}
             style={mode === 'dark' ? oneDark : tomorrow}
@@ -293,19 +309,19 @@ const handleCopy = (content: string, messageId?: string) => {
             customStyle={{
               margin: 0,
               fontSize: '12px',      
-              fontFamily: 'Consolas, Monaco, "Courier New", monospace', 
-              padding: '12px',     
+              fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+              padding: '12px',    
             }}
           >
             {code.trim()}
           </SyntaxHighlighter>
         </Box>
       );
-  
+ 
       lastIndex = offset + match.length;
       return match;
     });
-  
+ 
     if (lastIndex < text.length) {
       parts.push(
         <Typography
@@ -314,30 +330,30 @@ const handleCopy = (content: string, messageId?: string) => {
           sx={{
             whiteSpace: 'pre-wrap',
             fontSize: '14px',      
-            lineHeight: '1.6',     
-            fontFamily: 'Arial, sans-serif', 
-            // color: mode === 'dark' ? '#E1E1E1' : '#333', 
+            lineHeight: '1.6',    
+            fontFamily: 'Arial, sans-serif',
+            // color: mode === 'dark' ? '#E1E1E1' : '#333',
           }}
         >
           {text.substring(lastIndex)}
         </Typography>
       );
     }
-  
+ 
     return parts;
   };
-  
-  
-  
-  
-
+ 
+ 
+ 
+ 
+ 
   return (
 <Box
   sx={{
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
-    overflow: 'hidden', 
+    overflow: 'hidden',
   }}
 >
   {!conversationStarted ? (
@@ -350,13 +366,13 @@ const handleCopy = (content: string, messageId?: string) => {
         height: '100%',
         width: '100%',
         alignSelf: 'center',
-        
+       
       }}
     >
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
         How can I support you today?
       </Typography>
-
+ 
       <Box sx={{width: '100%',      maxWidth: { xs: '350px', sm: '400px', md: '650px' }} }     // Add some padding to prevent it from touching edges
  >
   <ChatInput
@@ -365,8 +381,8 @@ const handleCopy = (content: string, messageId?: string) => {
     onSend={handleSendMessage}
   />
 </Box>
-
-
+ 
+ 
     </Box>
   ) : (
     <>
@@ -390,21 +406,21 @@ const handleCopy = (content: string, messageId?: string) => {
               width: '100%',
             }}
           >
-               <ThreeDots 
-                          color={mode === 'dark' ? '#FFFFFF' : '#000000'} 
+               <ThreeDots
+                          color={mode === 'dark' ? '#FFFFFF' : '#000000'}
                           height={40} width={40} />          </Box>
         )}
-
+ 
         <Box
           sx={{
             opacity: isHistoryLoading ? 0.3 : 1,
             pointerEvents: isHistoryLoading ? 'none' : 'auto',
           }}
         />
-
+ 
         {selectedHistory && (
           <>
-          
+         
             {selectedHistory.questionAnswer.map((qa, index) => (
               <Box key={index} sx={{  mt: 2,mb: 2 }}>
                 <Box
@@ -433,7 +449,7 @@ const handleCopy = (content: string, messageId?: string) => {
   <Typography sx={{ fontSize: '12px' }}>
     {qa.question}
   </Typography>
-
+ 
   <Box
     className="question-icons"
     sx={{
@@ -443,8 +459,8 @@ const handleCopy = (content: string, messageId?: string) => {
       opacity: 0,
       transition: 'opacity 0.2s ease-in-out',
       position: 'absolute',
-      bottom: '-32px', 
-      left: '9px',   
+      bottom: '-32px',
+      left: '9px',  
       borderRadius: '8px',
       padding: '4px',
     }}
@@ -461,10 +477,10 @@ const handleCopy = (content: string, messageId?: string) => {
     </IconButton> */}
   </Box>
 </Box>
-
-
+ 
+ 
                 </Box>
-
+ 
                 <Box
   sx={{
     justifyContent: 'flex-start',
@@ -486,7 +502,7 @@ const handleCopy = (content: string, messageId?: string) => {
   >
     <Typography>{renderFormattedMessage(qa.answer)}</Typography>
   </Box>
-
+ 
   {/* Icons Outside the Content Box */}
   <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', mt: 1, ml: 1 }}>
     <IconButton onClick={() => handleCopy(qa.answer)}>
@@ -496,7 +512,7 @@ const handleCopy = (content: string, messageId?: string) => {
         <ContentCopy className='Icon_size' />
       )}
     </IconButton>
-
+ 
     <IconButton
       onClick={() => handleLike(qa.answer)}
       style={{ display: dislikedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}
@@ -506,7 +522,7 @@ const handleCopy = (content: string, messageId?: string) => {
         sx={{ color: likedIndexes.includes(qa.answer) ? 'blue' : 'inherit' }}
       />
     </IconButton>
-
+ 
     {!likedIndexes.includes(qa.answer) && (
       <IconButton
         onClick={() => handleDislike(qa.answer)}
@@ -518,7 +534,7 @@ const handleCopy = (content: string, messageId?: string) => {
         />
       </IconButton>
     )}
-
+ 
     <IconButton onClick={() => handleSpeak(index.toString(), qa.answer)}>
       {speakingMessageId?.toString() === index.toString() ? (
         <VolumeOff className='Icon_size' />
@@ -528,12 +544,12 @@ const handleCopy = (content: string, messageId?: string) => {
     </IconButton>
   </Box>
 </Box>
-
+ 
               </Box>
             ))}
           </>
         )}
-
+ 
 {messages.map((message) => (
   <Box
     key={message.id}
@@ -549,7 +565,7 @@ const handleCopy = (content: string, messageId?: string) => {
       {message.sender === 'user' }
     </Typography>
     {message.sender === 'user' && editingMessageId === message.id ? (
-      <Box sx={{ 
+      <Box sx={{
         width: '60%',
         backgroundColor: mode === 'dark' ? 'white' : 'black',
         borderRadius: '12px',
@@ -560,7 +576,7 @@ const handleCopy = (content: string, messageId?: string) => {
           multiline
           value={editedContent}
           onChange={(e) => setEditedContent(e.target.value)}
-          sx={{ 
+          sx={{
             '& .MuiInputBase-input': {
               color: mode === 'light' ? 'white' : 'black',
             },
@@ -570,17 +586,17 @@ const handleCopy = (content: string, messageId?: string) => {
           }}
           autoFocus
         />
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'flex-end', 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
           mt: 1,
           gap: '8px'
         }}>
-          <Button 
+          <Button
             onClick={handleCancelEdit}
             variant="outlined"
             size="small"
-            sx={{ 
+            sx={{
               color: mode === 'light' ? 'white' : 'black',
               borderColor: mode === 'light' ? 'white' : 'black',
               '&:hover': {
@@ -591,7 +607,7 @@ const handleCopy = (content: string, messageId?: string) => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={() => handleSaveEdit(message.id)}
             variant="contained"
             size="small"
@@ -624,7 +640,7 @@ const handleCopy = (content: string, messageId?: string) => {
   }}
     >
       {renderFormattedMessage(message.content)}
-
+ 
       {message.type === 'image' && message.imageUrl && (
         <Box sx={{ mt: 1, width: '70%' }}>
           <img
@@ -658,56 +674,56 @@ const handleCopy = (content: string, messageId?: string) => {
     <ContentCopy className='Icon_size' />
   )}
 </IconButton>
-
+ 
   {message.sender === 'user' && editingMessageId !== message.id && (
         <IconButton onClick={() => handleEdit(message.id)}>
           <Edit className='Icon_size' />
         </IconButton>
       )}
-
+ 
   {message.sender !== 'user' && (
     <>
-<IconButton 
-  className='Icon_size' 
+<IconButton
+  className='Icon_size'
   onClick={() => handleLike(message.id)}
   style={{ display: dislikedIndexes.includes(message.id) ? 'none' : 'inline-flex' }}>
-  <ThumbUp 
-    className='Icon_size' 
-    sx={{ color: likedIndexes.includes(message.id) ? 'blue' : 'inherit' }} 
+  <ThumbUp
+    className='Icon_size'
+    sx={{ color: likedIndexes.includes(message.id) ? 'blue' : 'inherit' }}
   />
 </IconButton>
-
+ 
 {!likedIndexes.includes(message.id) && (
-  <IconButton 
-    className='Icon_size' 
+  <IconButton
+    className='Icon_size'
     onClick={() => handleDislike(message.id)}
     style={{ display: likedIndexes.includes(message.id) ? 'none' : 'inline-flex' }}>
-    <ThumbDown 
-      className='Icon_size' 
-      sx={{ color: dislikedIndexes.includes(message.id) ? 'red' : 'inherit' }} 
+    <ThumbDown
+      className='Icon_size'
+      sx={{ color: dislikedIndexes.includes(message.id) ? 'red' : 'inherit' }}
     />
   </IconButton>
 )}
-
+ 
       <IconButton  onClick={() => handleSpeak(message.id, message.content)}>
         {speakingMessageId === message.id ? <VolumeOff className='Icon_size' /> : <VolumeUp className='Icon_size' />}
       </IconButton>
     </>
   )}
-  {message.sender === 'user' && message.editHistory && message.editHistory.length > 0 && (
+{message.sender === 'user' && message.paginationData && (
   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-    <IconButton 
-      disabled={message.currentEditIndex === 0}
-      onClick={() => handleNavigateEditHistory(message.id,(message.currentEditIndex ?? 0) - 1)}
+    <IconButton
+      disabled={message.paginationData.currentIndex === 0}
+      onClick={() => handlePaginationNav(message.id, 'prev')}
     >
       <NavigateBefore />
     </IconButton>
     <Typography variant="caption">
-      {`${(message.currentEditIndex ?? 0) + 1}/${message.editHistory.length + 1}`}
+      {`${message.paginationData.currentIndex + 1}/${message.paginationData.totalCount}`}
     </Typography>
-    <IconButton 
-      disabled={message.currentEditIndex === message.editHistory.length}
-      onClick={() => handleNavigateEditHistory(message.id,(message.currentEditIndex ?? 0) + 1)}
+    <IconButton
+      disabled={message.paginationData.currentIndex === message.paginationData.totalCount - 1}
+      onClick={() => handlePaginationNav(message.id, 'next')}
     >
       <NavigateNext />
     </IconButton>
@@ -716,11 +732,11 @@ const handleCopy = (content: string, messageId?: string) => {
 </Box>
   </Box>
 ))}
-
-
-        
-        {loading &&                 <ThreeDots 
-                          color={mode === 'dark' ? '#FFFFFF' : '#000000'} 
+ 
+ 
+       
+        {loading &&                 <ThreeDots
+                          color={mode === 'dark' ? '#FFFFFF' : '#000000'}
                           height={35} width={35} />}
                            <div ref={messagesEndRef} />
       </Box>
@@ -737,8 +753,8 @@ const handleCopy = (content: string, messageId?: string) => {
     </>
   )}
 </Box>
-
+ 
   );
 };
-
+ 
 export default ChatArea;

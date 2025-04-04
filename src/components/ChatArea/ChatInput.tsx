@@ -79,7 +79,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
   };
 
   const handleSend = () => {
-    if (count >= 5) {
+    if (count >= 50) {
       console.log('Send blocked - Show rating dialog');
       return;
     }

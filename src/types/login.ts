@@ -10,4 +10,6 @@ interface AuthState {
     loading: boolean;
     data: GoogleAuth[];  // Store the fetched data
     error: string | null;
+    status: "idle" | "loading" | "succeeded" | "failed";
+
 }

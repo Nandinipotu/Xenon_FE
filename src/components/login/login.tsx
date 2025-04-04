@@ -50,8 +50,11 @@ const dispatch = useAppDispatch();
 
 
 const handleGoogleLogin = () => {
+    
     window.location.href = "http://localhost:8090/oauth2/authorization/google";
 };
+
+
 
 
 

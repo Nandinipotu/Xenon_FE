@@ -24,7 +24,7 @@ const Home: React.FC = () => {
 
       if (!token) {
         try {
-          await dispatch(fetchGoogleAccount()).unwrap();
+          await dispatch(fetchGoogleAccount() as any).unwrap();
         } catch (error) {
           console.error("Google authentication failed:", error);
         }
@@ -40,7 +40,7 @@ const Home: React.FC = () => {
     setSidebarOpen((prev) => !prev);
   };
 
-  if (!authChecked) return <div>Loading authentication...</div>;
+  if (!authChecked) return <div></div>;
 
   return (
     <Box sx={styles.root} display="flex" height="100vh">

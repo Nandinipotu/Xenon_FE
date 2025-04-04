@@ -157,136 +157,125 @@ const historyData = useSelector((state: RootState) => state.history.history);
   }, [isMobile]);
 
 
-  const renderHistoryList = (data: any[], label: string) => (
-    <>
-      <Typography variant="subtitle2" sx={styles.sectionTitle}>
-        {label}
-      </Typography>
+  const renderHistoryList = (data: any[], label: string) => {
+    if (status !== 'loading' && status !== 'failed' && data.length === 0) {
+      return null; // completely empty if no history and not loading/failed
+    }
   
-      <List sx={styles.list}>
-        {/* {status === 'loading' && <Typography>Loading...</Typography>} */}
-        {status === "loading" && (
-          <>
+    return (
+      <>
+        <Typography variant="subtitle2" sx={styles.sectionTitle}>
+          {label}
+        </Typography>
+  
+        {status === 'loading' ? (
+          <List sx={styles.list}>
             {[...Array(4)].map((_, index) => (
               <ListItem key={index} disablePadding sx={{ p: 1 }}>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", width: "100%" }}
-                >
-                  <Skeleton
-                    variant="circular"
-                    width={24}
-                    height={24}
-                    sx={{ mr: 1 }}
-                  />
+                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                  <Skeleton variant="circular" width={24} height={24} sx={{ mr: 1 }} />
                   <Skeleton variant="text" width="80%" height={20} />
                 </Box>
               </ListItem>
             ))}
-          </>
-        )}
-
-        {status === 'failed' && <Typography color="error">{error}</Typography>}
+          </List>
+        ) : status === 'failed' ? (
+          <Typography color="error">{error}</Typography>
+        ) : (
+          <List sx={styles.list}>
+            {data.map((item, index) => {
+              const isSelected = selectedChat === item.id;
+              const question = item.questionAnswer[0]?.question || "No Question";
+              const truncatedQuestion = truncateText(question);
+              const firstChars = getFirstChars(question);
   
-        {data.length > 0 ? (
-          data.map((item, index) => {
-            const isSelected = selectedChat === item.id;
-            const question = item.questionAnswer[0]?.question || "No Question";
-            const truncatedQuestion = truncateText(question);
-            const firstChars = getFirstChars(question);
-  
-            return (
-              <ListItem
-                key={index}
-                disablePadding
-                onClick={() => handleHistoryClick(item)}
-                sx={{ cursor: 'pointer' }}
-                className={`sidebar-history-item ${isSelected ? 'selected' : ''}`}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '100%',
-                    p: 1,
-                    borderRadius: '12px',
-                    transition: 'background 0.3s, box-shadow 0.3s',
-                    backgroundColor: isSelected 
-                      ? mode === 'dark' ? 'rgba(0, 123, 255, 0.15)' : 'rgba(0, 123, 255, 0.1)'
-                      : 'transparent',
-                    boxShadow: isSelected ? '0 4px 12px rgba(0, 123, 255, 0.2)' : 'none',
-                    '&:hover': {
+              return (
+                <ListItem
+                  key={index}
+                  disablePadding
+                  onClick={() => handleHistoryClick(item)}
+                  sx={{ cursor: 'pointer' }}
+                  className={`sidebar-history-item ${isSelected ? 'selected' : ''}`}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '100%',
+                      p: 1,
+                      borderRadius: '12px',
+                      transition: 'background 0.3s, box-shadow 0.3s',
                       backgroundColor: isSelected 
                         ? mode === 'dark' ? 'rgba(0, 123, 255, 0.15)' : 'rgba(0, 123, 255, 0.1)'
-                        : mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                    },
-                    position: 'relative',
-                  }}
-                >
-                  <HistoryIcon fontSize="small" sx={styles.listItemIcon} />
-                  <Tooltip title={question} placement="top" arrow>
-                    <Box sx={{ overflow: 'hidden', flexGrow: 1 }}>
-                      <Typography
-                        className="sidebar-list-item-text"
-                        sx={{
-                          ...styles.listItemText,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: 'block',
-                        }}
-                      >
-                        {truncatedQuestion}
-                      </Typography>
-                      <Typography
-                        className="sidebar-list-item-short"
-                        sx={{
-                          ...styles.listItemText,
-                          display: 'none',
-                          fontWeight: 'medium',
-                        }}
-                      >
-                        {firstChars}
-                      </Typography>
-                    </Box>
-                  </Tooltip>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleMenuOpen(e, item)}
-                    className="more-options-icon"
-                    sx={{
-                      ml: 1,
-                      p: 0,
-                      opacity: 0,
-                      transition: 'opacity 0.3s',
-                      position: 'absolute',
-                      right: '8px',
+                        : 'transparent',
+                      boxShadow: isSelected ? '0 4px 12px rgba(0, 123, 255, 0.2)' : 'none',
                       '&:hover': {
-                        opacity: '1 !important',
+                        backgroundColor: isSelected 
+                          ? mode === 'dark' ? 'rgba(0, 123, 255, 0.15)' : 'rgba(0, 123, 255, 0.1)'
+                          : mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                       },
+                      position: 'relative',
                     }}
                   >
-                    <MoreHorizIcon sx={{ 
-                      fontSize: '16px', 
-                      color: mode === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'
-                    }} />
-                  </IconButton>
-                </Box>
-              </ListItem>
-            );
-          })
-        ) : (
-          <Typography sx={{ 
-            textAlign: "center", 
-            fontSize: '12px !important',
-            color: mode === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'
-          }}>
-            No history found.
-          </Typography>
+                    <HistoryIcon fontSize="small" sx={styles.listItemIcon} />
+                    <Tooltip title={question} placement="top" arrow>
+                      <Box sx={{ overflow: 'hidden', flexGrow: 1 }}>
+                        <Typography
+                          className="sidebar-list-item-text"
+                          sx={{
+                            ...styles.listItemText,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: 'block',
+                          }}
+                        >
+                          {truncatedQuestion}
+                        </Typography>
+                        <Typography
+                          className="sidebar-list-item-short"
+                          sx={{
+                            ...styles.listItemText,
+                            display: 'none',
+                            fontWeight: 'medium',
+                          }}
+                        >
+                          {firstChars}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleMenuOpen(e, item)}
+                      className="more-options-icon"
+                      sx={{
+                        ml: 1,
+                        p: 0,
+                        opacity: 0,
+                        transition: 'opacity 0.3s',
+                        position: 'absolute',
+                        right: '8px',
+                        '&:hover': {
+                          opacity: '1 !important',
+                        },
+                      }}
+                    >
+                      <MoreHorizIcon sx={{ 
+                        fontSize: '16px', 
+                        color: mode === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)'
+                      }} />
+                    </IconButton>
+                  </Box>
+                </ListItem>
+              );
+            })}
+          </List>
         )}
-      </List>
-    </>
-  );
+      </>
+    );
+  };
+  
 
 
   return (

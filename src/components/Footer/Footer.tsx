@@ -18,6 +18,7 @@ import { MdSend } from "react-icons/md";
 import { sendAppreciationMail } from '../../api/endpoints'; // Import from your endpoints file
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
+import { IoIosPeople } from "react-icons/io";
 
 // for fetch token from cookies 
 // import { getSenderEmailFromToken } from '../../utils/tokenUtils'; // Import from token utils
@@ -152,9 +153,9 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
            Neural AI can make mistakes. Check important info.
           </Typography>
           {userType === "google" && (
-          <Box sx={styles.iconContainer} onClick={handleClickOpen}>
-            <img src={partyPopper} alt="Party Popper" style={styles.popperImage} />
-          </Box>
+            <Box sx={styles.iconContainer} onClick={handleClickOpen}>
+  <IoIosPeople style={styles.popperImage} />
+</Box>
            )} 
         </Box>
       </Box>
@@ -282,7 +283,9 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
                   >
                     {member.email}
                   </Typography>
-                  <Box
+
+                  {/* send icon */}
+                  {/* <Box
   component="span"
   onClick={(e) => {
     e.stopPropagation();
@@ -308,7 +311,7 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
   }}
 >
   <MdSend />
-</Box>
+</Box> */}
 
                 </Box>
               </Box>

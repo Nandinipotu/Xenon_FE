@@ -7,7 +7,7 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
-  TextField 
+  TextField
 } from '@mui/material';
 import { ThumbUp, ThumbDown, ContentCopy, Edit, VolumeUp, VolumeOff, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
@@ -15,24 +15,24 @@ import { chatAreaStyles } from './ChatAreaStyles';
 import ChatInput from './ChatInput';
 import { useTheme } from '../../context/ThemeContext';
 import { useAppDispatch, useAppSelector } from "../../api/hooks";
-import { navigateEditHistory, sendMessage, updateUserMessage } from "../../store/slices/chatSlice";
+import { editUserQuestion, navigateEditHistory, navigatePagination, sendMessage, updateUserMessage } from "../../store/slices/chatSlice";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow, oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ContentCopy as CopyIcon, Check as CheckIcon } from '@mui/icons-material';
 import { ThreeDots } from 'react-loader-spinner';
 import { fetchChatHistory } from 'store/slices/sessionIdSlice';
-
+ 
 interface History {
   date: string;
   questionAnswer: { question: string; answer: string }[];
 }
-
+ 
 interface ChatAreaProps {
   mode: 'light' | 'dark';
   message: string;
 }
-
-
+ 
+ 
 const ChatArea: React.FC = () => {
   const { mode } = useTheme();
   const muiTheme = useMuiTheme();
@@ -44,8 +44,8 @@ const ChatArea: React.FC = () => {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState('');
-  
-
+ 
+ 
   const { messages, loading } = useAppSelector((state) => state.chat);
   const activeColor = mode === 'dark' ? '#191970' : 'black';
   console.log("newchat", messages);
@@ -56,29 +56,29 @@ const ChatArea: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
+ 
   // Scroll to bottom when messages or loading state changes
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
-
+ 
   const handleInputChange = (value: string) => {
     setInputValue(value);
   };
-
+ 
   const handleSendMessage = async () => {
     const trimmedInput = inputValue.trim();
-  
+ 
     if (trimmedInput !== '') {
       try {
         const isImagePrompt = trimmedInput.toLowerCase().includes('generate');
-  
+ 
         const sessionId = crypto.randomUUID();
-  
+ 
         await dispatch(fetchChatHistory(sessionId));
-  
+ 
         window.history.pushState({}, '', `/chatbot/${sessionId}`);
-  
+ 
         dispatch(
           sendMessage({
             prompt: trimmedInput,
@@ -86,7 +86,7 @@ const ChatArea: React.FC = () => {
             isNewChat: true,
           })
         );
-  
+ 
         setInputValue('');
         // console.log('Message sent with session ID:', sessionId);
       } catch (error) {
@@ -94,18 +94,18 @@ const ChatArea: React.FC = () => {
       }
     }
   };
-  
+ 
   useEffect(() => {
     if (selectedHistory) {
       setIsHistoryLoading(true);
       const timer = setTimeout(() => {
         setIsHistoryLoading(false);
-      }, 1000); 
-
+      }, 1000);
+ 
       return () => clearTimeout(timer);
     }
   }, [selectedHistory]);
-  
+ 
   useEffect(() => {
     if (selectedHistory) {
       setIsHistoryLoading(true);
@@ -119,26 +119,26 @@ const ChatArea: React.FC = () => {
  
 const [likedIndexes, setLikedIndexes] = useState<string[]>([]);
 const [dislikedIndexes, setDislikedIndexes] = useState<string[]>([]);
-
+ 
 const handleLike = (id: string) => {
   setLikedIndexes((prev) =>
     prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
   );
   setDislikedIndexes((prev) => prev.filter((i) => i !== id)); // Remove from dislikes when liked
 };
-
+ 
 const handleDislike = (id: string) => {
   setDislikedIndexes((prev) =>
     prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
   );
   setLikedIndexes((prev) => prev.filter((i) => i !== id)); // Remove from likes when disliked
 };
-
+ 
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
     console.log(`Copied message: ${content}`);
   };
-
+ 
   const handleEdit = (id: string) => {
     // Find the message to edit
     const messageToEdit = messages.find(msg => msg.id === id);
@@ -147,7 +147,7 @@ const handleDislike = (id: string) => {
       setEditedContent(messageToEdit.content);
     }
   };
-
+ 
   const handleCancelEdit = () => {
     setEditingMessageId(null);
     setEditedContent('');
@@ -156,25 +156,40 @@ const handleDislike = (id: string) => {
     dispatch(navigateEditHistory({ id, index }));
   };
   const handleSaveEdit = (id: string) => {
-    // Update the message in Redux
-    dispatch(updateUserMessage({ id, content: editedContent }));
-    
-    // But we need to identify this as an edit, not a new message
-    dispatch(
-      sendMessage({
-        prompt: editedContent,
-        message: editedContent, 
-        isNewChat: false,
-        isEdit: true,  // Add this flag
-        editedMessageId: id  // Pass the ID of the edited message
-      })
-    );
-    
+    // Find the message being edited
+    const messageToEdit = messages.find(msg => msg.id === id);
+    if (messageToEdit && messageToEdit.sessionId) {
+      // Call the edit API with the sessionId and new content
+      dispatch(editUserQuestion({
+        sessionId: messageToEdit.sessionId,
+        newQuestion: editedContent,
+        messageId: id
+      }));
+    } else {
+      // If no sessionId, just update the message locally and trigger a new message
+      dispatch(updateUserMessage({ id, content: editedContent }));
+     
+      dispatch(
+        sendMessage({
+          prompt: editedContent,
+          message: editedContent,
+          isNewChat: false,
+          isEdit: true,  // Add this flag
+          editedMessageId: id  // Pass the ID of the edited message
+        })
+      );
+    }
+   
     // Reset editing state
     setEditingMessageId(null);
     setEditedContent('');
   };
-
+ 
+  // Add pagination navigation handler
+  const handlePaginationNav = (id: string, direction: 'next' | 'prev') => {
+    dispatch(navigatePagination({ id, direction }));
+  };
+ 
   const handleSpeak = (id: string, text: string) => {
     if ('speechSynthesis' in window) {
       if (speakingMessageId === id) {
@@ -186,7 +201,7 @@ const handleDislike = (id: string) => {
         utterance.rate = 1;
         utterance.pitch = 1;
         utterance.volume = 1;
-
+ 
         utterance.onend = () => setSpeakingMessageId(null);
         window.speechSynthesis.speak(utterance);
         setSpeakingMessageId(id);
@@ -195,12 +210,12 @@ const handleDislike = (id: string) => {
       console.error('Text-to-speech not supported');
     }
   };
-
+ 
   const renderFormattedMessage = (text: string, mode: 'light' | 'dark' = 'light') => {
     if (!text) {
       return (
-<Box 
-                sx={{ 
+<Box
+                sx={{
                     color: mode === 'dark' ? 'black' : 'black',
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "14px",
@@ -213,7 +228,7 @@ const handleDislike = (id: string) => {
     const codeBlockRegex = /```(.*?)\n([\s\S]*?)```/g;
     const parts = [];
     let lastIndex = 0;
-  
+ 
     text.replace(codeBlockRegex, (match, lang, code, offset) => {
       if (offset > lastIndex) {
         parts.push(
@@ -222,9 +237,9 @@ const handleDislike = (id: string) => {
             variant="body1"
             sx={{
               whiteSpace: 'pre-wrap',
-              fontSize: '14px',     
-              lineHeight: '1.6',     
-              fontFamily: 'Arial, sans-serif', 
+              fontSize: '14px',    
+              lineHeight: '1.6',    
+              fontFamily: 'Arial, sans-serif',
               // color: mode === 'dark' ? '#E1E1E1' : '#333',
             }}
           >
@@ -232,7 +247,7 @@ const handleDislike = (id: string) => {
           </Typography>
         );
       }
-  
+ 
       const handleCopy = async (code: string) => {
         try {
           await navigator.clipboard.writeText(code);
@@ -241,7 +256,7 @@ const handleDislike = (id: string) => {
           console.error('Failed to copy text: ', err);
         }
       };
-  
+ 
       parts.push(
         <Box
           key={offset}
@@ -269,7 +284,7 @@ const handleDislike = (id: string) => {
               <CopyIcon />
             </IconButton>
           </Tooltip>
-  
+ 
           <SyntaxHighlighter
             language={lang || 'javascript'}
             style={mode === 'dark' ? oneDark : tomorrow}
@@ -277,19 +292,19 @@ const handleDislike = (id: string) => {
             customStyle={{
               margin: 0,
               fontSize: '12px',      
-              fontFamily: 'Consolas, Monaco, "Courier New", monospace', 
-              padding: '12px',     
+              fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+              padding: '12px',    
             }}
           >
             {code.trim()}
           </SyntaxHighlighter>
         </Box>
       );
-  
+ 
       lastIndex = offset + match.length;
       return match;
     });
-  
+ 
     if (lastIndex < text.length) {
       parts.push(
         <Typography
@@ -298,30 +313,30 @@ const handleDislike = (id: string) => {
           sx={{
             whiteSpace: 'pre-wrap',
             fontSize: '14px',      
-            lineHeight: '1.6',     
-            fontFamily: 'Arial, sans-serif', 
-            // color: mode === 'dark' ? '#E1E1E1' : '#333', 
+            lineHeight: '1.6',    
+            fontFamily: 'Arial, sans-serif',
+            // color: mode === 'dark' ? '#E1E1E1' : '#333',
           }}
         >
           {text.substring(lastIndex)}
         </Typography>
       );
     }
-  
+ 
     return parts;
   };
-  
-  
-  
-  
-
+ 
+ 
+ 
+ 
+ 
   return (
 <Box
   sx={{
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
-    overflow: 'hidden', 
+    overflow: 'hidden',
   }}
 >
   {!conversationStarted ? (
@@ -334,13 +349,13 @@ const handleDislike = (id: string) => {
         height: '100%',
         width: '100%',
         alignSelf: 'center',
-        
+       
       }}
     >
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
         How can I support you today?
       </Typography>
-
+ 
       <Box sx={{ width: { xs: '350px', sm: '400px', md: '600px' } }}>
   <ChatInput
     value={inputValue}
@@ -348,8 +363,8 @@ const handleDislike = (id: string) => {
     onSend={handleSendMessage}
   />
 </Box>
-
-
+ 
+ 
     </Box>
   ) : (
     <>
@@ -373,21 +388,21 @@ const handleDislike = (id: string) => {
               width: '100%',
             }}
           >
-               <ThreeDots 
-                          color={mode === 'dark' ? '#FFFFFF' : '#000000'} 
+               <ThreeDots
+                          color={mode === 'dark' ? '#FFFFFF' : '#000000'}
                           height={40} width={40} />          </Box>
         )}
-
+ 
         <Box
           sx={{
             opacity: isHistoryLoading ? 0.3 : 1,
             pointerEvents: isHistoryLoading ? 'none' : 'auto',
           }}
         />
-
+ 
         {selectedHistory && (
           <>
-          
+         
             {selectedHistory.questionAnswer.map((qa, index) => (
               <Box key={index} sx={{  mt: 2,mb: 2 }}>
                 <Box
@@ -416,7 +431,7 @@ const handleDislike = (id: string) => {
   <Typography sx={{ fontSize: '12px' }}>
     {qa.question}
   </Typography>
-
+ 
   <Box
     className="question-icons"
     sx={{
@@ -426,8 +441,8 @@ const handleDislike = (id: string) => {
       opacity: 0,
       transition: 'opacity 0.2s ease-in-out',
       position: 'absolute',
-      bottom: '-32px', 
-      left: '9px',   
+      bottom: '-32px',
+      left: '9px',  
       borderRadius: '8px',
       padding: '4px',
     }}
@@ -440,10 +455,10 @@ const handleDislike = (id: string) => {
     </IconButton> */}
   </Box>
 </Box>
-
-
+ 
+ 
                 </Box>
-
+ 
                 <Box
                   sx={{
                     display: 'flex',
@@ -464,28 +479,28 @@ const handleDislike = (id: string) => {
                     }}
                   >
                     <Typography>{renderFormattedMessage(qa.answer)}</Typography>
-
+ 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', mt: 1 }}>
                       <IconButton  onClick={() => handleCopy(qa.answer)}>
                         <ContentCopy className='Icon_size' />
                         </IconButton>
-
-                        <IconButton 
+ 
+                        <IconButton
   onClick={() => handleLike(qa.answer)}
   style={{ display: dislikedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}>
-  <ThumbUp 
-    className='Icon_size' 
-    sx={{ color: likedIndexes.includes(qa.answer) ? 'blue' : 'inherit' }} 
+  <ThumbUp
+    className='Icon_size'
+    sx={{ color: likedIndexes.includes(qa.answer) ? 'blue' : 'inherit' }}
   />
 </IconButton>
-
+ 
 {!likedIndexes.includes(qa.answer) && (
-  <IconButton 
+  <IconButton
     onClick={() => handleDislike(qa.answer)}
     style={{ display: likedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}>
-    <ThumbDown 
-      className='Icon_size' 
-      sx={{ color: dislikedIndexes.includes(qa.answer) ? 'red' : 'inherit' }} 
+    <ThumbDown
+      className='Icon_size'
+      sx={{ color: dislikedIndexes.includes(qa.answer) ? 'red' : 'inherit' }}
     />
   </IconButton>
 )}
@@ -499,7 +514,7 @@ const handleDislike = (id: string) => {
             ))}
           </>
         )}
-
+ 
 {messages.map((message) => (
   <Box
     key={message.id}
@@ -515,7 +530,7 @@ const handleDislike = (id: string) => {
       {message.sender === 'user' }
     </Typography>
     {message.sender === 'user' && editingMessageId === message.id ? (
-      <Box sx={{ 
+      <Box sx={{
         width: '60%',
         backgroundColor: mode === 'dark' ? 'white' : 'black',
         borderRadius: '12px',
@@ -526,7 +541,7 @@ const handleDislike = (id: string) => {
           multiline
           value={editedContent}
           onChange={(e) => setEditedContent(e.target.value)}
-          sx={{ 
+          sx={{
             '& .MuiInputBase-input': {
               color: mode === 'light' ? 'white' : 'black',
             },
@@ -536,17 +551,17 @@ const handleDislike = (id: string) => {
           }}
           autoFocus
         />
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'flex-end', 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
           mt: 1,
           gap: '8px'
         }}>
-          <Button 
+          <Button
             onClick={handleCancelEdit}
             variant="outlined"
             size="small"
-            sx={{ 
+            sx={{
               color: mode === 'light' ? 'white' : 'black',
               borderColor: mode === 'light' ? 'white' : 'black',
               '&:hover': {
@@ -557,7 +572,7 @@ const handleDislike = (id: string) => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={() => handleSaveEdit(message.id)}
             variant="contained"
             size="small"
@@ -590,7 +605,7 @@ const handleDislike = (id: string) => {
   }}
     >
       {renderFormattedMessage(message.content)}
-
+ 
       {message.type === 'image' && message.imageUrl && (
         <Box sx={{ mt: 1, width: '70%' }}>
           <img
@@ -625,50 +640,50 @@ const handleDislike = (id: string) => {
           <Edit className='Icon_size' />
         </IconButton>
       )}
-
+ 
   {message.sender !== 'user' && (
     <>
-<IconButton 
-  className='Icon_size' 
+<IconButton
+  className='Icon_size'
   onClick={() => handleLike(message.id)}
   style={{ display: dislikedIndexes.includes(message.id) ? 'none' : 'inline-flex' }}>
-  <ThumbUp 
-    className='Icon_size' 
-    sx={{ color: likedIndexes.includes(message.id) ? 'blue' : 'inherit' }} 
+  <ThumbUp
+    className='Icon_size'
+    sx={{ color: likedIndexes.includes(message.id) ? 'blue' : 'inherit' }}
   />
 </IconButton>
-
+ 
 {!likedIndexes.includes(message.id) && (
-  <IconButton 
-    className='Icon_size' 
+  <IconButton
+    className='Icon_size'
     onClick={() => handleDislike(message.id)}
     style={{ display: likedIndexes.includes(message.id) ? 'none' : 'inline-flex' }}>
-    <ThumbDown 
-      className='Icon_size' 
-      sx={{ color: dislikedIndexes.includes(message.id) ? 'red' : 'inherit' }} 
+    <ThumbDown
+      className='Icon_size'
+      sx={{ color: dislikedIndexes.includes(message.id) ? 'red' : 'inherit' }}
     />
   </IconButton>
 )}
-
+ 
       <IconButton  onClick={() => handleSpeak(message.id, message.content)}>
         {speakingMessageId === message.id ? <VolumeOff className='Icon_size' /> : <VolumeUp className='Icon_size' />}
       </IconButton>
     </>
   )}
-  {message.sender === 'user' && message.editHistory && message.editHistory.length > 0 && (
+{message.sender === 'user' && message.paginationData && (
   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-    <IconButton 
-      disabled={message.currentEditIndex === 0}
-      onClick={() => handleNavigateEditHistory(message.id,(message.currentEditIndex ?? 0) - 1)}
+    <IconButton
+      disabled={message.paginationData.currentIndex === 0}
+      onClick={() => handlePaginationNav(message.id, 'prev')}
     >
       <NavigateBefore />
     </IconButton>
     <Typography variant="caption">
-      {`${(message.currentEditIndex ?? 0) + 1}/${message.editHistory.length + 1}`}
+      {`${message.paginationData.currentIndex + 1}/${message.paginationData.totalCount}`}
     </Typography>
-    <IconButton 
-      disabled={message.currentEditIndex === message.editHistory.length}
-      onClick={() => handleNavigateEditHistory(message.id,(message.currentEditIndex ?? 0) + 1)}
+    <IconButton
+      disabled={message.paginationData.currentIndex === message.paginationData.totalCount - 1}
+      onClick={() => handlePaginationNav(message.id, 'next')}
     >
       <NavigateNext />
     </IconButton>
@@ -677,11 +692,11 @@ const handleDislike = (id: string) => {
 </Box>
   </Box>
 ))}
-
-
-        
-        {loading &&                 <ThreeDots 
-                          color={mode === 'dark' ? '#FFFFFF' : '#000000'} 
+ 
+ 
+       
+        {loading &&                 <ThreeDots
+                          color={mode === 'dark' ? '#FFFFFF' : '#000000'}
                           height={35} width={35} />}
                            <div ref={messagesEndRef} />
       </Box>
@@ -697,14 +712,8 @@ const handleDislike = (id: string) => {
     </>
   )}
 </Box>
-
+ 
   );
 };
-
+ 
 export default ChatArea;
-
-
-
-
-
-

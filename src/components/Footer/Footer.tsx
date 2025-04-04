@@ -5,6 +5,8 @@ import { useTheme } from '../../context/ThemeContext';
 import partyPopper from "../../assets/party-popper.png";
 import CloseIcon from '@mui/icons-material/Close';
 import { fetchTeamMember } from 'api/endpoints';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store';
 
 interface TeamMember {
   id: string;
@@ -50,6 +52,8 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
     setOpen(false);
   };
   console.log('Team Members being rendered:', teamMembers);
+  const userType = useSelector((state: RootState) => state.auth.userType);
+
 
   return (
     <>
@@ -58,9 +62,11 @@ const Footer: React.FC<{ sidebarOpen: boolean }> = ({ sidebarOpen }) => {
           <Typography variant="caption" sx={styles.text}>
            Neural AI can make mistakes.
           </Typography>
+          {userType === "google" && (
           <Box sx={styles.iconContainer} onClick={handleClickOpen}>
             <img src={partyPopper} alt="Party Popper" style={styles.popperImage} />
           </Box>
+          )}
         </Box>
       </Box>
 

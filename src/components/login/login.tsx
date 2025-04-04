@@ -1,14 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { use, useEffect } from 'react';
 import { Box, Button, Divider, Typography, TextField, Stack } from '@mui/material';
 import { Google, Apple, Phone, Microsoft } from '@mui/icons-material';
 import googleicon from '../../assets/google.png'
 import microsofticon from '../../assets/microsoft.png'
-import guesticon from '../../assets/guest1.png'
+import guesticon from '../../assets/guest2.png'
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from 'store';
 import { useDispatch } from 'react-redux';
 import { fetchGoogleAccount } from 'store/slices/login';
 import { Guestlogin } from 'store/slices/guestLoginSlice';
+import Cookies from 'js-cookie';
 
 
 const Login: React.FC = () => {
@@ -17,18 +18,30 @@ const Login: React.FC = () => {
 
     const handleNavigate = async () => {
         try {
-            const resultAction = await dispatch(Guestlogin());
+            // Check if the guest token already exists in cookies
+            const guestToken = Cookies.get("jwt");
+            
+            if (!guestToken) {
+                // Dispatch the Guestlogin action only if the token is not present
+                const resultAction = await dispatch(Guestlogin());
     
-            if (Guestlogin.fulfilled.match(resultAction)) {
-                console.log('Login successful:', resultAction.payload.token);
-                navigate('/chatbot');  
+                if (Guestlogin.fulfilled.match(resultAction)) {
+                    console.log("Login successful:", resultAction.payload.token);
+                    navigate('/chatbot');
+                } else {
+                    console.error("Login failed:", resultAction.payload);
+                }
             } else {
-                console.error('Login failed:', resultAction.payload);
+                // If the token already exists, directly navigate to the chatbot page
+                console.log("Guest token already exists:", guestToken);
+                navigate('/chatbot');
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            console.error("Error during login:", error);
         }
     };
+    
+    
     
     
 
@@ -36,8 +49,10 @@ const dispatch = useAppDispatch();
 
 
 const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8090/oauth2/authorization/google';
-}
+    window.location.href = "http://localhost:8090/oauth2/authorization/google";
+};
+
+
 
     return (
         <Box display="flex" justifyContent="center" alignItems="center" height="100vh" bgcolor="#f5f5f5">
@@ -50,6 +65,8 @@ const handleGoogleLogin = () => {
 
                 <Stack spacing={2} sx={{ marginTop: 2 }}>
     <Button
+                        className='continue_button'
+
         startIcon={
             <img
                 src={googleicon}
@@ -64,26 +81,15 @@ const handleGoogleLogin = () => {
     >
         Continue with Google
     </Button>
-    {/* <Button
-        startIcon={
-            <img
-                src={microsofticon}
-                alt="Microsoft"
-                style={{ width: 20, height: 20,marginRight: 8  }}
-            />
-        }
-        fullWidth
-        variant="outlined"
-        style={{ justifyContent: 'flex-start', textAlign: 'left', padding: '14px 16px', minHeight: 50 }}
-    >
-        Continue with Microsoft Account
-    </Button> */}
+  
     <Button
+                        className='continue_button'
+
         startIcon={
             <img
                 src={guesticon}
                 alt="Guest"
-                style={{ width: 20, height: 20, marginRight: 8  }}
+                style={{ width: 20, height: 20, marginRight: 7  }}
             />
         }
         onClick={handleNavigate}
@@ -96,7 +102,7 @@ const handleGoogleLogin = () => {
 </Stack>
 
 
-                <Button
+                {/* <Button
                     fullWidth
                     variant="contained"
                     className='continue_button'
@@ -105,7 +111,7 @@ const handleGoogleLogin = () => {
                     sx={{ mt: 5, mb: 2,padding: '14px 16px', minHeight: 50 }}
                 >
                     Continue
-                </Button>
+                </Button> */}
             </Box>
         </Box>
     );

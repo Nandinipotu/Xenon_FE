@@ -85,7 +85,8 @@ const initialState: HistoryState = {
   todayData: [],               // Separate state for today's history
   yesterdayData: [], 
   lastSevenDays: [],
-  lastThirtyDays:[],          // Separate state for yesterday's history
+  lastThirtyDays:[], 
+  count: 0,         // Separate state for yesterday's history
   status: 'idle',
   error: null,
   selectedHistory: null,
@@ -112,6 +113,8 @@ const historySlice = createSlice({
       .addCase(fetchTodayHistory.fulfilled, (state, action: PayloadAction<HistoryItem[]>) => {
         state.status = 'succeeded';
         state.todayData = action.payload;
+        state.count = action.payload.length; // Set count based on data length
+
       })
       .addCase(fetchTodayHistory.rejected, (state, action) => {
         state.status = 'failed';

@@ -13,7 +13,6 @@ const routes: RouteType[] = [
   { path: "/", element: <Login /> },
   { path: "/chatbot", element: <Home /> },
   { path: "/chatbot:sessionId", element: <Home /> },
-
   {
     path: "*",
     element: <PageNotFound />,

@@ -21,6 +21,9 @@ import { tomorrow, oneDark } from 'react-syntax-highlighter/dist/esm/styles/pris
 import { ContentCopy as CopyIcon, Check as CheckIcon } from '@mui/icons-material';
 import { ThreeDots } from 'react-loader-spinner';
 import { fetchChatHistory } from 'store/slices/sessionIdSlice';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import { fetchGoogleAccount } from 'store/slices/login';
+import Cookies from 'js-cookie';
 
 interface History {
   date: string;
@@ -51,13 +54,22 @@ const ChatArea: React.FC = () => {
   console.log("newchat", messages);
   // const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const selectedHistory = useAppSelector((state) => state.history.selectedHistory) as History | null;
- 
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
   const conversationStarted = messages.length > 0 || selectedHistory !== null;
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Scroll to bottom when messages or loading state changes
+ 
+  useEffect(() => {
+    const token = Cookies.get("jwt");
+    if (!token) {
+      dispatch(fetchGoogleAccount());
+    }
+  }, [dispatch]);
+  
+
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
@@ -134,10 +146,15 @@ const handleDislike = (id: string) => {
   setLikedIndexes((prev) => prev.filter((i) => i !== id)); // Remove from likes when disliked
 };
 
-  const handleCopy = (content: string) => {
-    navigator.clipboard.writeText(content);
-    console.log(`Copied message: ${content}`);
-  };
+ 
+
+const handleCopy = (content: string, messageId?: string) => {
+  navigator.clipboard.writeText(content);
+  setCopiedMessageId(messageId || content); // Use content as fallback ID
+  setTimeout(() => setCopiedMessageId(null), 1500);
+};
+
+
 
   const handleEdit = (id: string) => {
     // Find the message to edit
@@ -156,21 +173,18 @@ const handleDislike = (id: string) => {
     dispatch(navigateEditHistory({ id, index }));
   };
   const handleSaveEdit = (id: string) => {
-    // Update the message in Redux
     dispatch(updateUserMessage({ id, content: editedContent }));
     
-    // But we need to identify this as an edit, not a new message
     dispatch(
       sendMessage({
         prompt: editedContent,
         message: editedContent, 
         isNewChat: false,
-        isEdit: true,  // Add this flag
-        editedMessageId: id  // Pass the ID of the edited message
+        isEdit: true,  
+        editedMessageId: id 
       })
     );
     
-    // Reset editing state
     setEditingMessageId(null);
     setEditedContent('');
   };
@@ -233,13 +247,10 @@ const handleDislike = (id: string) => {
         );
       }
   
-      const handleCopy = async (code: string) => {
-        try {
-          await navigator.clipboard.writeText(code);
-          alert('Code copied to clipboard!');
-        } catch (err) {
-          console.error('Failed to copy text: ', err);
-        }
+      const handleCopyCode = async (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopiedMessageId(code); // Use content ascode fallback ID
+        setTimeout(() => setCopiedMessageId(null), 1500);
       };
   
       parts.push(
@@ -255,7 +266,7 @@ const handleDislike = (id: string) => {
             backgroundColor: mode === 'dark' ? '#2D2D2D' : '#F5F5F5',
           }}
         >
-          <Tooltip title="Copy to clipboard" arrow>
+          {/* <Tooltip title="Copy to clipboard" arrow> */}
             <IconButton
               sx={{
                 position: 'absolute',
@@ -264,11 +275,16 @@ const handleDislike = (id: string) => {
                 zIndex: 1,
                 color: mode === 'dark' ? 'white' : 'black',
               }}
-              onClick={() => handleCopy(code)}
+              onClick={() => handleCopyCode(code)}
             >
-              <CopyIcon />
-            </IconButton>
-          </Tooltip>
+                {copiedMessageId === code ? (
+ <CheckCircle className='Icon_size' />
+) : (
+  <ContentCopy className='Icon_size' />
+)}            </IconButton>
+
+           
+          {/* </Tooltip> */}
   
           <SyntaxHighlighter
             language={lang || 'javascript'}
@@ -341,7 +357,8 @@ const handleDislike = (id: string) => {
         How can I support you today?
       </Typography>
 
-      <Box sx={{ width: { xs: '350px', sm: '400px', md: '600px' } }}>
+      <Box sx={{width: '100%',      maxWidth: { xs: '350px', sm: '400px', md: '650px' }} }     // Add some padding to prevent it from touching edges
+ >
   <ChatInput
     value={inputValue}
     onChange={handleInputChange}
@@ -432,9 +449,13 @@ const handleDislike = (id: string) => {
       padding: '4px',
     }}
   >
-    <IconButton onClick={() => handleCopy(qa.question)}>
-      <ContentCopy className='Icon_size' />
-    </IconButton>
+ <IconButton onClick={() => handleCopy(qa.question)}>
+  {copiedMessageId === qa.question ? (
+    <CheckCircle className='Icon_size' />
+  ) : (
+    <ContentCopy className='Icon_size' />
+  )}
+</IconButton>
     {/* <IconButton onClick={() => handleEdit(qa.question)}>
       <Edit className='Icon_size' />
     </IconButton> */}
@@ -445,56 +466,69 @@ const handleDislike = (id: string) => {
                 </Box>
 
                 <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    mb: 1,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      backgroundColor: '#f1f1f1',
-                      color: 'black',
-                      padding: '8px 12px',
-                      borderRadius: '12px',
-                      maxWidth: '80%',
-                      wordWrap: 'break-word',
-                      position: 'relative',
-                    }}
-                  >
-                    <Typography>{renderFormattedMessage(qa.answer)}</Typography>
+  sx={{
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    mb: 1,
+  }}
+>
+  {/* Content Box */}
+  <Box
+    sx={{
+      backgroundColor: '#f1f1f1',
+      color: 'black',
+      padding: '8px 12px',
+      borderRadius: '12px',
+      maxWidth: '80%',
+      wordWrap: 'break-word',
+      position: 'relative',
+    }}
+  >
+    <Typography>{renderFormattedMessage(qa.answer)}</Typography>
+  </Box>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', mt: 1 }}>
-                      <IconButton  onClick={() => handleCopy(qa.answer)}>
-                        <ContentCopy className='Icon_size' />
-                        </IconButton>
+  {/* Icons Outside the Content Box */}
+  <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', mt: 1, ml: 1 }}>
+    <IconButton onClick={() => handleCopy(qa.answer)}>
+      {copiedMessageId === qa.answer ? (
+        <CheckCircle className='Icon_size' />
+      ) : (
+        <ContentCopy className='Icon_size' />
+      )}
+    </IconButton>
 
-                        <IconButton 
-  onClick={() => handleLike(qa.answer)}
-  style={{ display: dislikedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}>
-  <ThumbUp 
-    className='Icon_size' 
-    sx={{ color: likedIndexes.includes(qa.answer) ? 'blue' : 'inherit' }} 
-  />
-</IconButton>
+    <IconButton
+      onClick={() => handleLike(qa.answer)}
+      style={{ display: dislikedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}
+    >
+      <ThumbUp
+        className='Icon_size'
+        sx={{ color: likedIndexes.includes(qa.answer) ? 'blue' : 'inherit' }}
+      />
+    </IconButton>
 
-{!likedIndexes.includes(qa.answer) && (
-  <IconButton 
-    onClick={() => handleDislike(qa.answer)}
-    style={{ display: likedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}>
-    <ThumbDown 
-      className='Icon_size' 
-      sx={{ color: dislikedIndexes.includes(qa.answer) ? 'red' : 'inherit' }} 
-    />
-  </IconButton>
-)}
-                      <IconButton  onClick={() => handleSpeak(index.toString(), qa.answer)}>
-                        {speakingMessageId?.toString() === index.toString() ? <VolumeOff className='Icon_size' /> : <VolumeUp className='Icon_size' />}
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </Box>
+    {!likedIndexes.includes(qa.answer) && (
+      <IconButton
+        onClick={() => handleDislike(qa.answer)}
+        style={{ display: likedIndexes.includes(qa.answer) ? 'none' : 'inline-flex' }}
+      >
+        <ThumbDown
+          className='Icon_size'
+          sx={{ color: dislikedIndexes.includes(qa.answer) ? 'red' : 'inherit' }}
+        />
+      </IconButton>
+    )}
+
+    <IconButton onClick={() => handleSpeak(index.toString(), qa.answer)}>
+      {speakingMessageId?.toString() === index.toString() ? (
+        <VolumeOff className='Icon_size' />
+      ) : (
+        <VolumeUp className='Icon_size' />
+      )}
+    </IconButton>
+  </Box>
+</Box>
+
               </Box>
             ))}
           </>
@@ -617,9 +651,14 @@ const handleDislike = (id: string) => {
     mt: 1,
   }}
 >
-  <IconButton   onClick={() => handleCopy(message.content)}>
+<IconButton onClick={() => handleCopy(message.content, message.id)}>
+  {copiedMessageId === message.id ? (
+    <CheckCircle className='Icon_size' />
+  ) : (
     <ContentCopy className='Icon_size' />
-  </IconButton >
+  )}
+</IconButton>
+
   {message.sender === 'user' && editingMessageId !== message.id && (
         <IconButton onClick={() => handleEdit(message.id)}>
           <Edit className='Icon_size' />
@@ -685,7 +724,8 @@ const handleDislike = (id: string) => {
                           height={35} width={35} />}
                            <div ref={messagesEndRef} />
       </Box>
-<Box sx={{alignSelf:"center", width:"52%"}}>
+      <Box sx={{ alignSelf:"center", width: { xs: '350px', sm: '400px', md: '650px' },    padding: '8px',      // Add some padding to prevent it from touching edges
+ }}>
 <ChatInput
         value={inputValue}
         onChange={handleInputChange}

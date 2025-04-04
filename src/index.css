@@ -14,8 +14,8 @@ body {
   overflow: auto;
 }
 
-.custom-appbar{
-  margin-top: auto!important;
+.custom-appbar {
+  margin-top: auto !important;
 }
 
 code {
@@ -69,9 +69,7 @@ code {
   border-bottom: none !important;
 }
 
-
-
-.Header_menu{
+.Header_menu {
   /* background-color: #007bff !important; */
   /* padding: 0px !important; */
   padding-top: 0px !important;
@@ -83,7 +81,6 @@ code {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   border-radius: 12px !important;
   transition: all 0.3s ease-in-out;
-  
 }
 
 .sidebar-container .MuiListItem-root:hover {
@@ -429,4 +426,19 @@ p {
   color: #fff;
   font-size: 1.3rem;
   cursor: pointer;
+}
+
+.animated-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.animated-lines path {
+  fill: none;
+  stroke: #ddd;
+  stroke-width: 0.5px;
+  vector-effect: non-scaling-stroke;
 }

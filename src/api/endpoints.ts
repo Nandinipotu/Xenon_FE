@@ -44,6 +44,18 @@ export const fetchTeamMember = async () => {
     throw error;
   }
 };
+export const sendAppreciationMail = async (receiverEmail: string, senderEmail: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `http://localhost:8090/api/mail/send?receiver=${encodeURIComponent(receiverEmail)}&sender=${encodeURIComponent(senderEmail)}`,
+      ''
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error sending appreciation email:', error);
+    throw error;
+  }
+};
 
 
 

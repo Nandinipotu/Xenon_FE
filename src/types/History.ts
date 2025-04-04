@@ -9,6 +9,7 @@ interface HistoryItem {
 
 interface HistoryState {
   todayData: HistoryItem[];
+  count: number;
   yesterdayData: HistoryItem[];
   lastSevenDays: HistoryItem[];
   lastThirtyDays: HistoryItem[];

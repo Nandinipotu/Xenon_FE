@@ -22,6 +22,9 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { Facebook, LinkedIn, Reddit, Twitter, Close,  } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, useAppDispatch } from 'store';
+import { logoutUser } from 'store/slices/logout';
 
 
 interface HeaderProps {
@@ -36,6 +39,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const [openDialog, setOpenDialog] = useState(false);
 
   const [openShareDialog, setOpenShareDialog] = useState(false);
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  console.log("usertype",userType);
+  
+
 
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -56,13 +63,27 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   };
 
 
-
+  const dispatch = useAppDispatch();
   const navigate = useNavigate()
 
-  const handleNavigateLogout = () => {
-    navigate('/');
+  const handleLoguout = () => {
+    navigate("/")
   }
+
+  const handleNavigateLogout = () => {
+    dispatch(logoutUser())
+      .unwrap() 
+      .then(() => {
+        navigate("/"); 
+      })
+      .catch((error) => {
+        console.error("Logout failed:", error);
+      });
+  };
+
+
   const [linkCreated, setLinkCreated] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.data);
 
   const handleCreateLink = () => {
     setLinkCreated(true);
@@ -84,23 +105,31 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
     
         ...styles.appBar,
         transition: 'margin 0.3s ease, width 0.3s ease',
-        marginLeft: sidebarOpen ? '250px' : '0',          
-        width: `calc(100% - ${sidebarOpen ? '250px' : '0'})`, 
+        marginLeft: {
+          xs: '0',  // No margin shift on mobile
+          sm: sidebarOpen ? '250px' : '0',  // Margin shift on larger screens
+        },
+        width: {
+          xs: '100%',  // Full width on mobile
+          sm: `calc(100% - ${sidebarOpen ? '250px' : '0'})`,  // Adjusted width on larger screens
+        },
         height:"50px",
-        marginTop:"-12px"
       }}
     >
       <Toolbar sx={styles.toolbar}>
         <Box sx={styles.leftContent}>
-        <IconButton
-  edge="start"
-  color="inherit"
-  aria-label="menu"
-  onClick={toggleSidebar}
-  sx={{ ...styles.menuButton, display: sidebarOpen ? 'none' : 'block' }}
->
-  <MenuIcon />
-</IconButton>
+        {userType === "google" && (
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={toggleSidebar}
+            sx={{ ...styles.menuButton, display: sidebarOpen ? "none" : "block" }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
           <Typography variant="h6" component="div" sx={styles.logo}>
          
   <img src={logo} alt="Logo" style={{ height: '30px', width: 'auto' }} />
@@ -108,7 +137,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
    
           
         </Box>
-        
+        {userType === "google" ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Button
   onClick={() => setOpenShareDialog(true)}
@@ -237,14 +266,19 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
     </Dialog>
 
         <ThemeToggle />
-            <Avatar 
-                onClick={handleAvatarClick} 
-                sx={{ cursor: 'pointer', bgcolor: 'primary.main',        width: 24,  // Smaller width
-                  height: 24, 
-                  fontSize: '0.875rem'  }}
-            >
-                U
-            </Avatar>
+        <Avatar
+      onClick={handleAvatarClick}
+      sx={{
+        cursor: "pointer",
+        bgcolor: "primary.main",
+        width: 24,
+        height: 24,
+        fontSize: "0.875rem",
+      }}
+      src={user?.picture} // ✅ Set profile image
+    >
+      {!user?.picture ? user?.name?.charAt(0) || "U" : null}
+    </Avatar>
 
 <Menu
   anchorEl={anchorEl}
@@ -295,7 +329,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
             fontSize: '1.25rem',
         }}
     >
-          Are you sure you want <br/> to logout?
+          {`Hey ${user?.name}, are you sure you want`}  to logout?
     </DialogTitle>
     <DialogContent
         sx={{
@@ -330,6 +364,13 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
 </Dialog>
 
         </Box>
+        ) : (
+          <Box sx={{ display: 'flex', justifyContent: 'center', padding: 2 }} >
+            <Button variant="contained" sx={{borderRadius:"20px"}} onClick={handleLoguout}>
+              Sign In
+            </Button>
+          </Box>
+        )}
       </Toolbar>
     </AppBar>
   );

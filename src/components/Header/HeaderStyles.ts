@@ -23,11 +23,13 @@ export const headerStyles = (mode: 'light' | 'dark'): HeaderStylesType => ({
     display: 'flex',
     justifyContent: 'space-between',
     padding: (theme) => theme.spacing(0, 1),
-    minHeight: '40px',
+    // backgroundColor:"red",
+    // minHeight: 'px',
   },
   leftContent: {
     display: 'flex',
     alignItems: 'center',
+    marginLeft:"10px"
   },
   rightContent: {
     display: 'flex',

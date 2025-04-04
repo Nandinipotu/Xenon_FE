@@ -1,5 +1,5 @@
 import React, { KeyboardEvent, useState } from 'react';
-import { TextField, IconButton, Box, InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating, Typography } from '@mui/material';
+import { TextField, IconButton, Box, InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating, Typography, Tooltip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
@@ -28,11 +28,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
   const dispatch = useAppDispatch();
   const [rating, setRating] = useState<number>(0);
 
-  const { count, showRating } = useSelector((state: RootState) => state.click);
+  const {  showRating } = useSelector((state: RootState) => state.click);
+  const count = useSelector((state: RootState) => state.history.count);
+  console.log(count,"count");
+  
+
 
   const handleSpeechToText = () => {
     if (!('webkitSpeechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser.');
       return;
     }
 
@@ -76,7 +79,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
   };
 
   const handleSend = () => {
-    if (count >= 50) {
+    if (count >= 5) {
       console.log('Send blocked - Show rating dialog');
       return;
     }
@@ -122,8 +125,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
                 color={recording ? 'error' : 'primary'}
                 sx={{ ml: 1 }}
               >
-                {recording ? <MicOffIcon /> : <MicIcon />}
-              </IconButton>
+  <Tooltip title={recording ? 'Recording in progress...' : 'Start Recording'} arrow placement="top">
+    {recording ? <MicOffIcon /> : <MicIcon />}
+  </Tooltip>              </IconButton>
             </InputAdornment>
           ),
         }}
@@ -159,17 +163,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
         onChange={(event, newValue) => setRating(newValue || 0)}
         size="large"
       />
-      {/* <Box sx={{ marginTop: 1 }}>
-        {rating > 0 && (
-          <span style={{ fontSize: '1rem', fontWeight: 500 }}>
-            {rating === 1 && 'Very Bad'}
-            {rating === 2 && 'Bad'}
-            {rating === 3 && 'Average'}
-            {rating === 4 && 'Good'}
-            {rating === 5 && 'Excellent'}
-          </span>
-        )}
-      </Box> */}
+   
       <Button
         onClick={handleSubmitRating}
         color="primary"

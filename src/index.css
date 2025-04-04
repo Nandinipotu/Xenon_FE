@@ -59,7 +59,8 @@ code {
 }
 
 .continue_button {
-  background: linear-gradient(90deg, #007bff, #8e44ad) !important;
+  /* background: linear-gradient(90deg, #007bff, #8e44ad) !important; */
+  background: linear-gradient(90deg, #8e44ad, #007bff) !important;
   color: white !important;
   border: none !important;
 }

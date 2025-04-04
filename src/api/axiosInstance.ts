@@ -1,10 +1,10 @@
 import axios, { AxiosHeaders, AxiosInstance } from "axios";
 import Cookies from "js-cookie";
 
-// const BASE_URL = "https://sparkapi-50025700077.development.catalystappsail.in/api/";
+const BASE_URL = "https://sparkapi-50025700077.development.catalystappsail.in/api/";
 
-const BASE_URL = "http://localhost:8090/api/";
-const OAUTH_URL = "http://localhost:8090/oauth2/";
+// const BASE_URL = "http://localhost:8090/api/";
+// const OAUTH_URL = "http://localhost:8090/oauth2/";
 
 const getToken = (): string | undefined => {
   return Cookies.get("jwt");
@@ -46,7 +46,7 @@ const createAxiosInstance = (): AxiosInstance => {
 
 const createOAuthInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: OAUTH_URL,
+    // baseURL: OAUTH_URL,
     withCredentials: true,
   });
 

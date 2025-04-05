@@ -18,51 +18,44 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
     const handleNavigate = async () => {
         try {
-          const guestToken = Cookies.get("jwt");
-      
-          if (!guestToken) {
-            const resultAction = await dispatch(Guestlogin());
-      
-            if (Guestlogin.fulfilled.match(resultAction)) {
-              const payload = resultAction.payload;
-      
-              const token = payload?.token;
-      
-              if (token) {
-                // Set cookies (if not already set by the thunk itself)
-                Cookies.set("jwt", token, {
-                  secure: true,
-                  sameSite: "None", // Use "None" for cross-site
-                  expires: 1,
-                });
-      
-                Cookies.set("userType", "guest", {
-                  secure: true,
-                  sameSite: "None",
-                  expires: 1,
-                });
-      
-                // ✅ Proceed after successful login
-                navigate("/chatbot");
-      
-                // 🧠 OR run follow-up API calls here after login
-                // await dispatch(fetchChatbotData());
-      
-              } else {
-                console.error("❌ Token not found in payload:", payload);
-              }
+            const guestToken = Cookies.get("jwt");
+   
+            if (!guestToken) {
+                const resultAction = await dispatch(Guestlogin());
+   
+                if (Guestlogin.fulfilled.match(resultAction)) {
+                    const payload = resultAction.payload;
+   
+                    if (payload?.token?.token) {
+                        const token = payload.token.token;
+   
+                        Cookies.set("jwt", token, {
+                            secure: true,
+                            sameSite: "Strict",
+                            expires: 1,
+                        });
+   
+                        Cookies.set("userType", "guest", {
+                            secure: true,
+                            sameSite: "Strict",
+                            expires: 1,
+                        });
+   
+                        navigate('/chatbot');
+                    } else {
+                        console.error("❌ Token not found in payload:", payload);
+                    }
+                } else {
+                    console.error("❌ Login failed:", resultAction.payload);
+                }
             } else {
-              console.error("❌ Login failed:", resultAction.payload);
+                navigate('/chatbot');
             }
-          } else {
-            // Already logged in, continue
-            console.log("✅ Token already exists. Proceeding...");
-            navigate("/chatbot");
-          }
         } catch (error) {
-          console.error("❌ Error during guest login:", error);
+            console.error("❌ Error during guest login:", error);
         }
-      };
+    };
+ 
       
     
     

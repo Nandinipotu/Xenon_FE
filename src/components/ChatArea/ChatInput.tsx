@@ -7,6 +7,7 @@ import { RootState, useAppDispatch } from 'store';
 import { useSelector } from 'react-redux';
 import { closeRating, incrementClick, resetClick } from 'store/slices/clickSlice';
 import CloseIcon from '@mui/icons-material/Close';
+import { useNavigate } from 'react-router-dom';
 
 interface Window {
   webkitSpeechRecognition: any;
@@ -30,8 +31,17 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
 
   const {  showRating } = useSelector((state: RootState) => state.click);
   const count = useSelector((state: RootState) => state.history.count);
-  console.log(count,"count");
+  const userType = useSelector((state: RootState) => state.auth.userType);
+  console.log("userType:", userType);
   
+
+  const [openGuestPopup, setOpenGuestPopup] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleSignin = () => {
+    navigate('/');
+  }
 
 
   const handleSpeechToText = () => {
@@ -79,14 +89,22 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
   };
 
   const handleSend = () => {
-    if (count >= 50) {
-      console.log('Send blocked - Show rating dialog');
+    const limit = userType === "guest" ? 3 : 50;
+  
+    if (count >= limit) {
+      if (userType === "guest") {
+        setOpenGuestPopup(true); // 👈 Show guest popup
+      } else {
+        console.log('Send blocked - Show rating dialog');
+      }
       return;
     }
+  
     dispatch(incrementClick());
     onSend();
     console.log('Send Button Clicked');
   };
+  
 
   const handleClose = () => {
     dispatch(closeRating());
@@ -176,6 +194,28 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, disabled
     </Box>
   </DialogContent>
 </Dialog>
+<Dialog open={openGuestPopup} onClose={() => setOpenGuestPopup(false)}>
+  <DialogTitle>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      Login Required
+    
+    </Box>
+  </DialogTitle>
+  <DialogContent>
+    <Typography variant="body1" gutterBottom>
+      You have reached the message limit for guest users. Please sign in with Google to continue using the chatbot.
+    </Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button
+    sx={{borderRadius:"20px"}}
+   onClick={handleSignin}
+    >
+      login / signup
+    </Button>
+  </DialogActions>
+</Dialog>
+
 
 
     </Box>

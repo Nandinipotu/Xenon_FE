@@ -16,32 +16,54 @@ import AnimatedBackground from '../ThemeToggle/AnimatedBackground';
 const Login: React.FC = () => {
 
     const navigate = useNavigate();
-
     const handleNavigate = async () => {
         try {
-            // Check if the guest token already exists in cookies
-            const guestToken = Cookies.get("jwt");
-            
-            if (!guestToken) {
-                // Dispatch the Guestlogin action only if the token is not present
-                const resultAction = await dispatch(Guestlogin());
-    
-                if (Guestlogin.fulfilled.match(resultAction)) {
-                    console.log("Login successful:", resultAction.payload.token);
-                    navigate('/chatbot');
-                } else {
-                    console.error("Login failed:", resultAction.payload);
-                }
+          const guestToken = Cookies.get("jwt");
+      
+          if (!guestToken) {
+            const resultAction = await dispatch(Guestlogin());
+      
+            if (Guestlogin.fulfilled.match(resultAction)) {
+              const payload = resultAction.payload;
+      
+              const token = payload?.token;
+      
+              if (token) {
+                // Set cookies (if not already set by the thunk itself)
+                Cookies.set("jwt", token, {
+                  secure: true,
+                  sameSite: "None", // Use "None" for cross-site
+                  expires: 1,
+                });
+      
+                Cookies.set("userType", "guest", {
+                  secure: true,
+                  sameSite: "None",
+                  expires: 1,
+                });
+      
+                // ✅ Proceed after successful login
+                navigate("/chatbot");
+      
+                // 🧠 OR run follow-up API calls here after login
+                // await dispatch(fetchChatbotData());
+      
+              } else {
+                console.error("❌ Token not found in payload:", payload);
+              }
             } else {
-                // If the token already exists, directly navigate to the chatbot page
-                console.log("Guest token already exists:", guestToken);
-                navigate('/chatbot');
+              console.error("❌ Login failed:", resultAction.payload);
             }
+          } else {
+            // Already logged in, continue
+            console.log("✅ Token already exists. Proceeding...");
+            navigate("/chatbot");
+          }
         } catch (error) {
-            console.error("Error during login:", error);
+          console.error("❌ Error during guest login:", error);
         }
-    };
-    
+      };
+      
     
     
     
@@ -50,10 +72,11 @@ const dispatch = useAppDispatch();
 
 
 const handleGoogleLogin = () => {
-    
-    // window.location.href = "http://localhost:8090/oauth2/authorization/google";
-    window.location.href = "https://sparkapi-50025700077.development.catalystappsail.in/login/oauth2/code/google";
-};
+    window.location.href =
+      "https://sparkapi-50025700077.development.catalystappsail.in/oauth2/authorization/google";
+    // window.location.href =
+    //   "https://sparkapi-50025700077.development.catalystappsail.in/oauth2/code/google";
+  };
 
 
 

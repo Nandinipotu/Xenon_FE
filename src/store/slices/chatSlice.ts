@@ -4,6 +4,7 @@ import { generateImage, generateQuestions } from '../../api/endpoints';
 import { v4 as uuidv4 } from 'uuid';
 import levenshtein from 'fast-levenshtein';
 import axiosInstance from 'api/axiosInstance';
+import { RootState } from 'store';
  
  
  
@@ -12,7 +13,7 @@ const initialState: ChatState = {
   messages: [],
   loading: false,
   error: null,
-  pendingMessageId: null, 
+  pendingMessageId: null,
   editLoading: false, // Add this to track edit loading state
   editResponseId: null, // Track the ID of the response being edited
 };
@@ -32,6 +33,11 @@ export const sendMessage = createAsyncThunk(
     { prompt: string; message: string; isNewChat: boolean; isEdit?: boolean; editedMessageId?: string },
     { dispatch, rejectWithValue, getState }) => {
     try {
+      const chatState = (getState() as RootState).chat;      
+      const isFirstMessage = chatState.messages.length === 0;
+     
+      isNewChat = isFirstMessage;
+     
       if (!isEdit) {
         const userMessageId = uuidv4();
         const userMessage: Message = {
@@ -60,14 +66,14 @@ export const sendMessage = createAsyncThunk(
           imageUrl: imageData,
         };
       } else {
-        // Pass both message and isNewChat to generateQuestions
+        // Pass the correctly calculated isNewChat to generateQuestions
         const questionResponse = await generateQuestions(message, isNewChat);
  
         return {
           messageId: pendingMessageId,
-          content: questionResponse.response, // Extract the actual response text
+          content: questionResponse.response,
           type: 'text' as const,
-          sessionId: questionResponse.sessionId, // Store the sessionId from response
+          sessionId: questionResponse.sessionId,
         };
       }
     } catch (error) {
@@ -80,23 +86,23 @@ export const sendMessage = createAsyncThunk(
 // Add a new action for handling edit API requests
 export const editUserQuestion = createAsyncThunk(
   'chat/editUserQuestion',
-  async ({ sessionId, newQuestion, messageId }: 
-    { sessionId: string; newQuestion: string; messageId: string }, 
+  async ({ sessionId, newQuestion, messageId }:
+    { sessionId: string; newQuestion: string; messageId: string },
     { dispatch, rejectWithValue }) => {
     try {
       // Call the edit API
       const response = await axiosInstance.put(
         `/history/edit-question?sessionId=${encodeURIComponent(sessionId)}&newQuestion=${encodeURIComponent(newQuestion)}`
       );
-
+ 
       // Log the full response to debug
       console.log('Edit API raw response:', response);
-      
+     
       // Check if we have valid data
       if (!response.data || !response.data.data) {
         return rejectWithValue('Invalid response from edit API');
       }
-
+ 
       // Return all the data we need
       return {
         messageId,
@@ -203,7 +209,7 @@ const chatSlice = createSlice({
     },
     setEditLoading: (state, action: PayloadAction<{messageId: string, responseId: string}>) => {
       const { messageId, responseId } = action.payload;
-      
+     
       // Update the user message
       const messageIndex = state.messages.findIndex(msg => msg.id === messageId);
       if (messageIndex !== -1) {
@@ -422,20 +428,20 @@ const chatSlice = createSlice({
       // })
       .addCase(editUserQuestion.pending, (state, action) => {
         state.editLoading = true;
-        
+       
         // Find the message and set loading UI
         const messageId = action.meta.arg.messageId;
         const messageIndex = state.messages.findIndex(msg => msg.id === messageId);
-        
+       
         if (messageIndex !== -1) {
           // Update the user message immediately with the new question
           state.messages[messageIndex].content = action.meta.arg.newQuestion;
-          
+         
           // Find the associated AI response message (usually next one)
           if (messageIndex + 1 < state.messages.length) {
             const responseId = state.messages[messageIndex + 1].id;
             state.editResponseId = responseId;
-            
+           
             // Set the AI response to loading state
             state.messages[messageIndex + 1].isLoading = true;
             // We can also set a loading placeholder text if desired
@@ -443,36 +449,36 @@ const chatSlice = createSlice({
           }
         }
       })
-      
+     
       // .addCase(editUserQuestion.fulfilled, (state, action) => {
       //   state.editLoading = false;
       //   state.editResponseId = null;
-        
+       
       //   const { messageId, editedData, newQuestion, sessionId } = action.payload;
       //   const messageIndex = state.messages.findIndex(msg => msg.id === messageId);
-        
+       
       //   if (messageIndex !== -1 && editedData) {
       //     const userMessage = state.messages[messageIndex];
       //     const aiMessageIndex = messageIndex + 1;
       //     const aiMessage = aiMessageIndex < state.messages.length ? state.messages[aiMessageIndex] : null;
-          
+         
       //     // Initialize the arrays for pagination
       //     let newQuestions = [newQuestion];  // Default to just the edited question
       //     let newAnswers = [];  // Empty initially
-          
+         
       //     // Handle different possible response structures
       //     if (editedData.questionAnswer && editedData.questionAnswer.length > 0) {
       //       const qa = editedData.questionAnswer[0];
-            
+           
       //       // Add original Q&A
       //       if (qa.question) newQuestions[0] = qa.question;
       //       if (qa.answer) newAnswers[0] = qa.answer;
-            
+           
       //       // Add new questions and answers if they exist
       //       if (qa.newquestion && Array.isArray(qa.newquestion)) {
       //         newQuestions = newQuestions.concat(qa.newquestion);
       //       }
-            
+           
       //       if (qa.newanswer && Array.isArray(qa.newanswer)) {
       //         newAnswers = newAnswers.concat(qa.newanswer);
       //       }
@@ -481,10 +487,10 @@ const chatSlice = createSlice({
       //       if (editedData.currentQA.question) newQuestions[0] = editedData.currentQA.question;
       //       if (editedData.currentQA.answer) newAnswers[0] = editedData.currentQA.answer;
       //     }
-          
+         
       //     // This is the key change: Use the currentIndex from the response or default to 0
       //     const currentIndex = editedData.currentQuestionIndex || 0;
-          
+         
       //     // Add pagination data to user message
       //     userMessage.paginationData = {
       //       newQuestions,
@@ -492,12 +498,12 @@ const chatSlice = createSlice({
       //       currentIndex: currentIndex,
       //       totalCount: editedData.count || newQuestions.length
       //     };
-          
+         
       //     // Update the session ID if it's not already set
       //     if (!userMessage.sessionId) {
       //       userMessage.sessionId = sessionId;
       //     }
-          
+         
       //     // Update AI response message if it exists
       //     if (aiMessage && newAnswers.length > 0) {
       //       // Get the answer at the current index instead of always showing the first one
@@ -512,35 +518,35 @@ const chatSlice = createSlice({
       .addCase(editUserQuestion.fulfilled, (state, action) => {
         state.editLoading = false;
         state.editResponseId = null;
-        
+       
         const { messageId, editedData, newQuestion, sessionId } = action.payload;
         const messageIndex = state.messages.findIndex(msg => msg.id === messageId);
-        
+       
         if (messageIndex !== -1 && editedData) {
           const userMessage = state.messages[messageIndex];
           const aiMessageIndex = messageIndex + 1;
           const aiMessage = aiMessageIndex < state.messages.length ? state.messages[aiMessageIndex] : null;
-          
+         
           // Initialize the arrays for pagination
           let newQuestions = [];
           let newAnswers = [];
-          
+         
           // Handle different possible response structures
           if (editedData.questionAnswer && editedData.questionAnswer.length > 0) {
             const qa = editedData.questionAnswer[0];
-            
+           
             // Create the arrays with original question first
             newQuestions = [qa.question, ...qa.newquestion || []];
             newAnswers = [qa.answer, ...qa.newanswer || []];
-            
+           
             // Important: Find the index of the edited question in the array
             // This assumes the edited question is in the newquestion array
-            const editedQuestionIndex = qa.newquestion ? 
+            const editedQuestionIndex = qa.newquestion ?
               qa.newquestion.findIndex((q: string)=> q.toLowerCase() === newQuestion.toLowerCase()) + 1 : 0;
-            
+           
             // Use that index or fall back to the first new question (index 1)
             const currentIndex = editedQuestionIndex > 0 ? editedQuestionIndex : 1;
-            
+           
             // Add pagination data to user message
             userMessage.paginationData = {
               newQuestions,
@@ -548,15 +554,15 @@ const chatSlice = createSlice({
               currentIndex: currentIndex, // Use the found index, not the one from the backend
               totalCount: editedData.count || newQuestions.length
             };
-            
+           
             // Update the session ID if it's not already set
             if (!userMessage.sessionId) {
               userMessage.sessionId = sessionId;
             }
-            
+           
             // Update the user message to show the edited question
             userMessage.content = newQuestions[currentIndex];
-            
+           
             // Update AI response message if it exists
             if (aiMessage && newAnswers.length > currentIndex) {
               aiMessage.content = newAnswers[currentIndex]; // Show the corresponding answer
@@ -564,7 +570,7 @@ const chatSlice = createSlice({
             }
           } else {
             console.warn('Invalid or empty questionAnswer in response', editedData);
-            
+           
             // Fallback handling
             userMessage.content = newQuestion;
             if (aiMessage) {
@@ -576,13 +582,13 @@ const chatSlice = createSlice({
           console.warn('Invalid or empty response for editUserQuestion', editedData);
         }
       })
-
+ 
      
       .addCase(editUserQuestion.rejected, (state, action) => {
         state.error = 'Failed to edit question';
         state.editLoading = false;
         state.editResponseId = null;
-        
+       
         // Find the response message that was being edited and reset its loading state
         if (state.editResponseId) {
           const responseIndex = state.messages.findIndex(msg => msg.id === state.editResponseId);
@@ -592,7 +598,7 @@ const chatSlice = createSlice({
           }
         }
       });
-      
+     
   },
 });
  

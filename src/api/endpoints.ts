@@ -1,33 +1,56 @@
 import axiosInstance from './axiosInstance';
+import Cookies from "js-cookie";
+
  
 export const generateImage = async (prompt: string, isNewChat: boolean) => {
   try {
-    const response = await axiosInstance.post(`/image-generation/generate?prompt=${encodeURIComponent(prompt)}&isNewChat=${isNewChat}`, '');
- 
+    // Check if user is logged in as guest
+    const isGuestUser = Cookies.get("userType") === "guest";
+    const guestSessionId = Cookies.get("guestSessionId");
+    
+    // Build the URL based on user type
+    let url = `/image-generation/generate?prompt=${encodeURIComponent(prompt)}&isNewChat=${isNewChat}`;
+    
+    // Add sessionId parameter if user is guest and sessionId exists
+    if (isGuestUser && guestSessionId) {
+      url += `&sessionId=${guestSessionId}`;
+    }
+    
+    const response = await axiosInstance.post(url, '');
     const imageUrl = response.data?.data?.[0]?.url;
+    
     if (!imageUrl) {
       throw new Error('No image URL found in response');
     }
- 
+    
     return imageUrl;
   } catch (error) {
     console.error('Error generating image:', error);
     throw error;
   }
 };
- 
- 
+
 export const generateQuestions = async (message: string, isNewChat: boolean) => {
   try {
-    const response = await axiosInstance.post(`/chat/search?message=${encodeURIComponent(message)}&isNewChat=${isNewChat}`, null, {
+    // Check if user is logged in as guest
+    const isGuestUser = Cookies.get("userType") === "guest";
+    const guestSessionId = Cookies.get("guestSessionId");
+    
+    // Build the URL based on user type
+    let url = `/chat/search?message=${encodeURIComponent(message)}&isNewChat=${isNewChat}`;
+    
+    // Add sessionId parameter if user is guest and sessionId exists
+    if (isGuestUser && guestSessionId) {
+      url += `&sessionId=${guestSessionId}`;
+    }
+    
+    const response = await axiosInstance.post(url, null, {
       headers: {
         'Accept': 'application/json',
       },
     });
- 
-    // Log the parsed response directly (Axios does this automatically)
+    
     console.log('Parsed API Response:', response.data);
- 
     return response.data;
   } catch (error: any) {
     console.error('Error fetching data:', error.message);
@@ -71,7 +94,3 @@ export const editUserQuestion = async (sessionId: string, newQuestion: string) =
     throw error;
   }
 };
- 
- 
- 
- 

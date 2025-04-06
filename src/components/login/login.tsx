@@ -17,45 +17,28 @@ const Login: React.FC = () => {
 
     const navigate = useNavigate();
     const handleNavigate = async () => {
-        try {
-            const guestToken = Cookies.get("jwt");
-   
-            if (!guestToken) {
-                const resultAction = await dispatch(Guestlogin());
-   
-                if (Guestlogin.fulfilled.match(resultAction)) {
-                    const payload = resultAction.payload;
-   
-                    if (payload?.token?.token) {
-                        const token = payload.token.token;
-   
-                        Cookies.set("jwt", token, {
-                            secure: true,
-                            sameSite: "Strict",
-                            expires: 1,
-                        });
-   
-                        Cookies.set("userType", "guest", {
-                            secure: true,
-                            sameSite: "Strict",
-                            expires: 1,
-                        });
-   
-                        navigate('/chatbot');
-                    } else {
-                        console.error("❌ Token not found in payload:", payload);
-                    }
-                } else {
-                    console.error("❌ Login failed:", resultAction.payload);
-                }
-            } else {
-                navigate('/chatbot');
-            }
-        } catch (error) {
-            console.error("❌ Error during guest login:", error);
-        }
-    };
- 
+      try {
+          const guestToken = Cookies.get("jwt");
+      
+          if (!guestToken) {
+              const resultAction = await dispatch(Guestlogin());
+          
+              if (Guestlogin.fulfilled.match(resultAction)) {
+                  // Token and sessionId are already set in cookies by the thunk
+                  // Just navigate to the chatbot page
+                  navigate("/chatbot");
+              } else {
+                  console.error("❌ Login failed:", resultAction.payload);
+              }
+          } else {
+              // Already logged in, continue
+              console.log("✅ Token already exists. Proceeding...");
+              navigate("/chatbot");
+          }
+      } catch (error) {
+          console.error("❌ Error during guest login:", error);
+      }
+  };
       
     
     
@@ -69,6 +52,9 @@ const handleGoogleLogin = () => {
       "https://sparkapi-50025700077.development.catalystappsail.in/oauth2/authorization/google";
     // window.location.href =
     //   "https://sparkapi-50025700077.development.catalystappsail.in/oauth2/code/google";
+
+//"http://localhost:8090/oauth2/authorization/google";
+
   };
  
 

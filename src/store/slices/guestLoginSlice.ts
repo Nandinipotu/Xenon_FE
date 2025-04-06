@@ -1,28 +1,57 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from 'api/axiosInstance';
+import Cookies from 'js-cookie';
 
 interface AuthState {
   token: string | null;
+  guestSessionId: string | null; // Added session ID
   loading: boolean;
   error: string | null;
-  isAuthenticated: boolean;  // Added
+  isAuthenticated: boolean;
+  isGuestUser: boolean; // Added to track if user is guest
 }
 
 const initialState: AuthState = {
-  token: localStorage.getItem('token'),  // Load token from localStorage
+  token: Cookies.get("jwt") || null,
+  guestSessionId: Cookies.get("guestSessionId") || null,
   loading: false,
   error: null,
-  isAuthenticated: !!localStorage.getItem('token'),  // Set initial auth state
+  isAuthenticated: !!Cookies.get("jwt"),
+  isGuestUser: Cookies.get("userType") === "guest"
 };
 
-// Async thunk for login
+// Async thunk for guest login
 export const Guestlogin = createAsyncThunk(
-  'auth/login',
+  'auth/guestLogin',
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/guest/login');
       if (response.data.status) {
-        return { token: response.data.data };  // ✅ Store the token from the response
+        const { token, guestSessionId } = response.data.data;
+        
+        // Store both token and sessionId in cookies
+        Cookies.set("jwt", token, {
+          secure: true,
+          sameSite: "None",
+          expires: 1,
+        });
+        
+        Cookies.set("guestSessionId", guestSessionId, {
+          secure: true,
+          sameSite: "None",
+          expires: 1,
+        });
+        
+        Cookies.set("userType", "guest", {
+          secure: true,
+          sameSite: "None",
+          expires: 1,
+        });
+        
+        return { 
+          token,
+          guestSessionId
+        };
       } else {
         return rejectWithValue(response.data.message || 'Login failed');
       }
@@ -38,8 +67,12 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.token = null;
+      state.guestSessionId = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
+      state.isGuestUser = false;
+      Cookies.remove("jwt");
+      Cookies.remove("guestSessionId");
+      Cookies.remove("userType");
     },
   },
   extraReducers: (builder) => {
@@ -51,13 +84,15 @@ const authSlice = createSlice({
       .addCase(Guestlogin.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token;
-        state.isAuthenticated = true;  // ✅ Set isAuthenticated to true
-        localStorage.setItem('token', action.payload.token);
+        state.guestSessionId = action.payload.guestSessionId;
+        state.isAuthenticated = true;
+        state.isGuestUser = true;
       })
       .addCase(Guestlogin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-        state.isAuthenticated = false;  // ✅ Set isAuthenticated to false
+        state.isAuthenticated = false;
+        state.isGuestUser = false;
       });
   },
 });

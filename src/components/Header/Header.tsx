@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -12,8 +12,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Tooltip
 } from '@mui/material';
+import Cookies from 'js-cookie';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import { headerStyles } from './HeaderStyles';
 import { useTheme } from '../../context/ThemeContext';
@@ -31,6 +33,23 @@ interface HeaderProps {
   toggleSidebar: () => void;
   sidebarOpen: boolean;
 }
+const decodeJWT = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+};
+
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const { mode } = useTheme();
@@ -40,10 +59,26 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
 
   const [openShareDialog, setOpenShareDialog] = useState(false);
   const userType = useSelector((state: RootState) => state.auth.userType);
-  console.log("usertype",userType);
   
 
-
+  const [userProfilePicture, setUserProfilePicture] = useState("");    const userEmail = Cookies.get("email") || "";
+  const [userName, setUserName] = useState("");
+  useEffect(() => {
+    const token = Cookies.get("jwt");
+    if (token) {
+      const decoded = decodeJWT(token);
+      if (decoded && decoded.name) {
+        setUserName(decoded.name);
+      }
+    }
+  }, []);
+  useEffect(() => {
+    const pictureFromCookie = Cookies.get("picture");
+    if (pictureFromCookie) {
+      setUserProfilePicture(pictureFromCookie);
+      console.log("Profile picture from cookie:", pictureFromCookie); // For debugging
+    }
+  }, []);
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
       setAnchorEl(event.currentTarget);
@@ -266,19 +301,29 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
     </Dialog>
 
         <ThemeToggle />
-        <Avatar
-      onClick={handleAvatarClick}
-      sx={{
-        cursor: "pointer",
-        bgcolor: "primary.main",
-        width: 24,
-        height: 24,
-        fontSize: "0.875rem",
-      }}
-      src={user?.picture} // ✅ Set profile image
-    >
-      {!user?.picture ? user?.name?.charAt(0) || "U" : null}
-    </Avatar>
+        <Tooltip title={userEmail} arrow placement="bottom">
+  <Avatar
+    onClick={handleAvatarClick}
+    sx={{
+      cursor: "pointer",
+      bgcolor: "primary.main",
+      width: 24,
+      height: 24,
+      fontSize: "0.875rem",
+    }}
+  >
+    {userProfilePicture && userProfilePicture !== "" ? (
+      <img
+        src={userProfilePicture}
+        alt={userName || "User"}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+      />
+    ) : (
+      userName?.charAt(0) || "U"
+    )}
+  </Avatar>
+</Tooltip>
+
 
 <Menu
   anchorEl={anchorEl}
@@ -329,7 +374,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
             fontSize: '1.25rem',
         }}
     >
-          {`Hey ${user?.name}, are you sure you want`}  to logout?
+          {`Hey ${userName}, are you sure you want`}  to logout?
     </DialogTitle>
     <DialogContent
         sx={{

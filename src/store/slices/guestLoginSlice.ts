@@ -28,31 +28,8 @@ export const Guestlogin = createAsyncThunk(
       const response = await axiosInstance.post('/guest/login');
       if (response.data.status) {
         const { token, guestSessionId } = response.data.data;
-        
-        // Store both token and sessionId in cookies
-        Cookies.set("jwt", token, {
-          secure: true,
-          sameSite: "None",
-          expires: 1,
-        });
-        
-        Cookies.set("guestSessionId", guestSessionId, {
-          secure: true,
-          sameSite: "None",
-          expires: 1,
-        });
-        
-        Cookies.set("userType", "guest", {
-          secure: true,
-          sameSite: "None",
-          expires: 1,
-        });
-        
-        return { 
-          token,
-          guestSessionId
-        };
-      } else {
+        return { token, guestSessionId };
+      }  else {
         return rejectWithValue(response.data.message || 'Login failed');
       }
     } catch (error: any) {

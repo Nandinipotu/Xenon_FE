@@ -32,6 +32,7 @@ import { logoutUser } from 'store/slices/logout';
 interface HeaderProps {
   toggleSidebar: () => void;
   sidebarOpen: boolean;
+  userType?: 'guest' | 'google' | null;
 }
 const decodeJWT = (token: string) => {
   try {
@@ -61,7 +62,8 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, sidebarOpen }) => {
   const userType = useSelector((state: RootState) => state.auth.userType);
   
 
-  const [userProfilePicture, setUserProfilePicture] = useState("");    const userEmail = Cookies.get("email") || "";
+  const [userProfilePicture, setUserProfilePicture] = useState(""); 
+  const userEmail = Cookies.get("email") || "";
   const [userName, setUserName] = useState("");
   useEffect(() => {
     const token = Cookies.get("jwt");

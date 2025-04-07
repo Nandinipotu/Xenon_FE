@@ -45,6 +45,7 @@ import useIsMobile from './useIsMobile';
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  userType?: 'guest' | 'google' | null;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {

@@ -46,7 +46,7 @@ export const generateQuestions = async (message: string, isNewChat: boolean) => 
     
     const response = await axiosInstance.post(url, null, {
       headers: {
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     

@@ -33,6 +33,7 @@ interface History {
 interface ChatAreaProps {
   mode: 'light' | 'dark';
   message: string;
+  userType?: 'guest' | 'google' | null;
 }
  
  
